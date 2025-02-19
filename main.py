@@ -5,12 +5,12 @@ import logging
 
 import grpc
 
-import ClassIslandManagementServer.launcher as launcher
+import launcher as launcher
 
 # 配置日志记录器
-from ClassIslandManagementServer.Protobuf.Client import ClientRegisterCsReq_pb2
-from ClassIslandManagementServer.Protobuf.Enum import Retcode_pb2
-from ClassIslandManagementServer.Protobuf.Service import ClientRegister_pb2_grpc
+from Protobuf.Client import ClientRegisterCsReq_pb2
+from Protobuf.Enum import Retcode_pb2
+from Protobuf.Service import ClientRegister_pb2_grpc
 
 
 async def test_client_registration():
