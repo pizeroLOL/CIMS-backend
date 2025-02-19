@@ -9,6 +9,7 @@ from typing import Dict, Optional, AsyncIterable
 import grpc
 
 from Protobuf.Client import ClientCommandDeliverScReq_pb2, ClientRegisterCsReq_pb2
+from Protobuf.Command import HeartBeat_pb2, SendNotification_pb2
 from Protobuf.Enum import CommandTypes_pb2, Retcode_pb2
 from Protobuf.Server import ClientCommandDeliverScRsp_pb2, ClientRegisterScRsp_pb2
 from Protobuf.Service import ClientCommandDeliver_pb2_grpc, ClientRegister_pb2_grpc
@@ -117,15 +118,23 @@ class ClientCommandDeliverServicer(ClientCommandDeliver_pb2_grpc.ClientCommandDe
         async def send_commands():
             try:
                 while True:
-                    await asyncio.sleep(60)  # 每 60 秒发送一次
+                    await asyncio.sleep(15)  # 修改为 3 秒发送一次，加快测试
                     if client_uid not in db.clients or not db.clients[client_uid]["connected"]:
                         break
 
-                    logger.info(f"Sending RestartApp command to {client_uid}")
-                    await response_queue.put(ClientCommandDeliverScRsp_pb2.ClientCommandDeliverScRsp(
+                    logger.info(f"Sending SendNotification command to {client_uid}") # 修改为发送 SendNotification
+                    notification_payload = SendNotification_pb2.SendNotification( # 构建 SendNotification payload
+                        MessageMask="Test Mask",
+                        MessageContent="Test Content",
+                        DurationSeconds=2,
+                        RepeatCounts=1
+                    ).SerializeToString()
+
+                    yield ClientCommandDeliverScRsp_pb2.ClientCommandDeliverScRsp(
                         RetCode=Retcode_pb2.Success,
-                        Type=CommandTypes_pb2.RestartApp
-                    ))
+                        Type=CommandTypes_pb2.SendNotification, # 命令类型修改为 SendNotification
+                        Payload=notification_payload # 设置 payload
+                    )
             except asyncio.CancelledError:
                 logger.info(f"send_commands task cancelled for {client_uid}")
             except Exception as e:
