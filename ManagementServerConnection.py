@@ -168,18 +168,18 @@ class ClientRegisterServicer(ClientRegister_pb2_grpc.ClientRegisterServicer):
 # endregion
 
 # region FastAPI接口
-app = FastAPI(title="ClassIsland Management Server",
-              description="集控服务器API",
-              version="1.0.0", )
+command = FastAPI(title="ClassIsland Management Server",
+                  description="集控服务器API",
+                  version="1.0.0", )
 
 
-@app.get("/clients", summary="获取所有已注册客户端")
+@command.get("/clients", summary="获取所有已注册客户端")
 async def get_clients():
     """获取所有已注册的客户端列表"""
     return load_clients()
 
 
-@app.get("/clients/status", summary="获取所有客户端状态")
+@command.get("/clients/status", summary="获取所有客户端状态")
 async def get_all_client_status():
     """
     获取所有客户端的状态。
@@ -199,7 +199,7 @@ async def get_all_client_status():
     return status
 
 
-@app.get("/clients/{client_uid}/status", summary="获取指定客户端状态")
+@command.get("/clients/{client_uid}/status", summary="获取指定客户端状态")
 async def get_client_status(client_uid: str):
     """
     获取指定客户端的状态。
@@ -212,7 +212,7 @@ async def get_client_status(client_uid: str):
     return status[client_uid]
 
 
-@app.post("/clients/{client_uid}/restart", summary="重启指定客户端")
+@command.post("/clients/{client_uid}/restart", summary="重启指定客户端")
 async def restart_client(client_uid: str):
     """
     对指定客户端执行重新启动操作。
@@ -223,7 +223,7 @@ async def restart_client(client_uid: str):
     return {"message": f"Restart command sent to client: {client_uid}"}
 
 
-@app.post("/clients/{client_uid}/notify", summary="向指定客户端发送消息")
+@command.post("/clients/{client_uid}/notify", summary="向指定客户端发送消息")
 async def send_notification(client_uid: str,
                             message_mask: str,
                             message_content: str,
@@ -270,7 +270,7 @@ async def send_notification(client_uid: str,
     return {"message": f"Notification sent to client: {client_uid}"}
 
 
-@app.post("/clients/{client_uid}/update", summary="更新指定客户端数据")
+@command.post("/clients/{client_uid}/update", summary="更新指定客户端数据")
 async def update_client_data(client_uid: str):
     """
     对指定客户端执行更新数据操作。
@@ -281,7 +281,13 @@ async def update_client_data(client_uid: str):
     return {"message": f"Data update command sent to client: {client_uid}"}
 
 
-@app.get("/api/v1/client/{client_uid}/manifest", summary="获取客户端配置清单")
+api = FastAPI(
+    title="Management Server",
+    description="<UNK>",
+    version="1.0",
+)
+
+@api.get("/api/v1/client/{client_uid}/manifest", summary="获取客户端配置清单")
 async def get_client_manifest(client_uid: str):
     """
     获取指定客户端的配置清单（模拟）。
@@ -290,17 +296,18 @@ async def get_client_manifest(client_uid: str):
     """
     # 这里应该根据实际情况返回客户端的配置清单，这里只是一个示例
     manifest = {
-        "organizationName": "示例组织",
-        "policySource": {
+        "ServerKind": 1,
+        "OrganizationName": "示例组织",
+        "PolicySource": {
             "value": f"/api/v1/policy",
-            "version": "1.0"
-        },
+            "version": 1
+        }
         # 其他配置...
     }
     return manifest
 
 
-@app.get("/api/v1/policy", summary="获取策略")
+@api.get("/api/v1/policy", summary="获取策略")
 async def get_policy():
     """获取服务器策略（模拟）。"""
     # 这里应该根据实际情况返回策略，这里只是一个示例
@@ -320,25 +327,34 @@ async def start_grpc_server():
     server = grpc.aio.server()
     ClientRegister_pb2_grpc.add_ClientRegisterServicer_to_server(ClientRegisterServicer(), server)
     ClientCommandDeliver_pb2_grpc.add_ClientCommandDeliverServicer_to_server(ClientCommandDeliverServicer(), server)
-    listen_addr = f'0.0.0.0:50051'
+    listen_addr = f'127.0.0.1:50051'
     server.add_insecure_port(listen_addr)
     print(f"Starting gRPC server on {listen_addr}")
     await server.start()
     await server.wait_for_termination()
 
 
-async def start_fastapi_server():
+async def start_command_server():
     """启动FastAPI服务器"""
-    config = uvicorn.Config(app=app, host="0.0.0.0", port=50052, log_level="info")
+    config = uvicorn.Config(app=command, host="127.0.0.1", port=50052, log_level="debug")
     server = uvicorn.Server(config)
-    print("Starting FastAPI server...")
+    print("Starting Command server...")
+    await server.serve()
+
+
+async def start_api_server():
+    """<UNK>FastAPI<UNK>"""
+    config = uvicorn.Config(app=api, host="127.0.0.1", port=50050, log_level="debug")
+    server = uvicorn.Server(config)
+    print("Starting API server...")
     await server.serve()
 
 
 async def main():
     await asyncio.gather(
         start_grpc_server(),
-        start_fastapi_server()
+        start_command_server(),
+        start_api_server()
     )
 
 
