@@ -1,0 +1,15 @@
+[
+  {
+    "command": "ListClients",
+    "params": []
+  },
+  {
+    "command": "GetClientStatus",
+    "params": [
+      {
+        "choices": "ClientIDs",
+        "param": "ClineID"
+      }
+    ]
+  }
+]
