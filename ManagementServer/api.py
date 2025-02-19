@@ -23,8 +23,8 @@ async def get_client_manifest(client_uid: str):
         "ServerKind": 1,
         "OrganizationName": "示例组织",
         "PolicySource": {
-            "value": f"/api/v1/client/{client_uid}/policy",
-            "version": 1
+            "value": f"http://127.0.0.1:50050/api/v1/client/{client_uid}/policy",
+            "version": 2
         }
         # 其他配置...
     }
