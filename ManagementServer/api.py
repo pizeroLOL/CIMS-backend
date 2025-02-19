@@ -11,37 +11,9 @@ api = FastAPI(
 
 @api.get("/api/v1/client/{client_uid}/manifest", summary="获取客户端配置清单")
 async def get_client_manifest(client_uid: str):
-    """
-    获取指定客户端的配置清单
-
-    :param client_uid: 客户端 UUID
-
-    :return 配置清单
-    """
-    manifest = {
-        "ClassPlanSource": {
-            "Value": f"http://127.0.0.1:50050/api/v1/client/{client_uid}/classPlan",
-            "Version": 1
-        },
-        "TimeLayoutSource": {
-            "Value": f"http://127.0.0.1:50050/api/v1/client/{client_uid}/timeLayout",
-            "Version": 1
-        },
-        "SubjectsSource": {
-            "Value": f"http://127.0.0.1:50050/api/v1/client/{client_uid}/subjects",
-            "Version": 1
-        },
-        "DefaultSettingsSource": {
-            "Value": f"http://127.0.0.1:50050/api/v1/client/{client_uid}/settings",
-            "Version": 1
-        },
-        "PolicySource": {
-            "Value": f"http://127.0.0.1:50050/api/v1/client/{client_uid}/policy",
-            "Version": 2
-        },
-        "ServerKind": 1,
-        "OrganizationName": "CMS.py 本地测试"
-    }
+    """获取指定客户端的配置清单"""
+    with open(f"Datas/Manifests/{client_uid}.json", "r", encoding="utf-8") as f:
+        manifest = json.load(f)
     return manifest
 
 
