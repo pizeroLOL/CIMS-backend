@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1bProtobuf/Enum/Retcode.proto\x12 ClassIsland.Shared.Protobuf.Enum*v\n\x07Retcode\x12\x08\n\x04None\x10\x00\x12\x0c\n\x07Success\x10\xc8\x01\x12\x18\n\x13ServerInternalError\x10\xf4\x03\x12\x13\n\x0eInvalidRequest\x10\x94\x03\x12\x0f\n\nRegistered\x10\x91N\x12\x13\n\x0e\x43lientNotFound\x10\x92NB#\xaa\x02 ClassIsland.Shared.Protobuf.Enumb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1bProtobuf/Enum/Retcode.proto\x12 ClassIsland.Shared.Protobuf.Enum*}\n\x07Retcode\x12\x0f\n\x0bUnspecified\x10\x00\x12\x0c\n\x07Success\x10\xc8\x01\x12\x18\n\x13ServerInternalError\x10\xf4\x03\x12\x13\n\x0eInvalidRequest\x10\x94\x03\x12\x0f\n\nRegistered\x10\x91N\x12\x13\n\x0e\x43lientNotFound\x10\x92NB#\xaa\x02 ClassIsland.Shared.Protobuf.Enumb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -33,5 +33,5 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['DESCRIPTOR']._loaded_options = None
   _globals['DESCRIPTOR']._serialized_options = b'\252\002 ClassIsland.Shared.Protobuf.Enum'
   _globals['_RETCODE']._serialized_start=65
-  _globals['_RETCODE']._serialized_end=183
+  _globals['_RETCODE']._serialized_end=190
 # @@protoc_insertion_point(module_scope)
