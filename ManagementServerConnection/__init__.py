@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 # 定义 ManagementManifest 类（根据 C# 代码推断）
 class ManagementManifest:
-    def __init__(self, organization_name: str = "Default Organization"):
+    def __init__(self, organization_name: str = "ClassIslandManagementServer.py 开发测试"):
         self.OrganizationName = organization_name
 
 
@@ -27,8 +27,10 @@ class ManagementManifest:
 class Database:
     clients: Dict[str, Dict] = {}
     manifest: ManagementManifest = ManagementManifest()
+
     def get_manifest(self) -> ManagementManifest:
         return self.manifest
+
     def register_client(self, client_uid: str, client_id: str) -> Retcode_pb2.Retcode:
         """
         注册客户端。
@@ -50,6 +52,11 @@ class Database:
 # 模拟数据库实例
 db = Database()
 
+db.register_client(
+    client_uid="26077a30-7859-49c0-aab3-9e04c3ffa270",
+    client_id="TEST"
+)
+
 # 实现 ClientRegister 服务
 class ClientRegisterServicer(ClientRegister_pb2_grpc.ClientRegisterServicer):
     async def Register(self, request: ClientRegisterCsReq_pb2.ClientRegisterCsReq,
@@ -70,54 +77,101 @@ class ClientRegisterServicer(ClientRegister_pb2_grpc.ClientRegisterServicer):
 # 实现 ClientCommandDeliver 服务
 class ClientCommandDeliverServicer(ClientCommandDeliver_pb2_grpc.ClientCommandDeliverServicer):
 
-    async def ListenCommand(self, request_iterator: AsyncIterable[ClientCommandDeliverScReq_pb2.ClientCommandDeliverScReq]
-                             , context: grpc.aio.ServicerContext) -> AsyncIterable[ClientCommandDeliverScRsp_pb2.ClientCommandDeliverScRsp]:
+    async def ListenCommand(self,
+                            request_iterator: AsyncIterable[ClientCommandDeliverScReq_pb2.ClientCommandDeliverScReq],
+                            context: grpc.aio.ServicerContext) -> AsyncIterable[
+        ClientCommandDeliverScRsp_pb2.ClientCommandDeliverScRsp]:
         """
         处理客户端命令监听（双向流）。
         """
         metadata = dict(context.invocation_metadata())
         client_uid = metadata.get('cuid')
         logger.info(f"Client connected: {client_uid}")
-        db.clients.get(client_uid, {})["connected"] = True
+        if not client_uid or client_uid not in db.clients:
+            logger.warning(f"Client not found or invalid: {client_uid}")
+            return
+
+        db.clients[client_uid]["connected"] = True
+        response_queue = asyncio.Queue()
 
         # 异步处理客户端消息
         async def handle_client_messages():
-            async for request in request_iterator:
-                if request.Type == CommandTypes_pb2.Ping:
-                    # 处理 Ping 请求
-                    logger.debug(f"Received ping from {client_uid}")
-                    yield ClientCommandDeliverScRsp_pb2.ClientCommandDeliverScRsp(
-                        RetCode=Retcode_pb2.Success,
-                        Type=CommandTypes_pb2.Pong
-                    )
-                else:
-                    logger.warning(f"Received unknown command type: {request.Type}")
+            try:
+                async for request in request_iterator:
+                    if request.Type == CommandTypes_pb2.Ping:
+                        # 处理 Ping 请求
+                        logger.debug(f"Received ping from {client_uid}")
+                        await response_queue.put(ClientCommandDeliverScRsp_pb2.ClientCommandDeliverScRsp(
+                            RetCode=Retcode_pb2.Success,
+                            Type=CommandTypes_pb2.Pong
+                        ))
+                    else:
+                        logger.warning(f"Received unknown command type: {request.Type}")
+            except Exception as e:
+                logger.exception(f"Error handling client messages: {e}")
+            finally:
+                logger.debug(f"handle_client_messages task finished for {client_uid}")
+
 
         # 模拟向客户端发送命令 (例如，每隔一段时间发送 RestartApp)
         async def send_commands():
-            while True:
-                await asyncio.sleep(60)  # 每 60 秒发送一次
-                if client_uid not in db.clients or not db.clients[client_uid]["connected"]:
-                    break
+            try:
+                while True:
+                    await asyncio.sleep(60)  # 每 60 秒发送一次
+                    if client_uid not in db.clients or not db.clients[client_uid]["connected"]:
+                        break
 
-                logger.info(f"Sending RestartApp command to {client_uid}")
-                yield ClientCommandDeliverScRsp_pb2.ClientCommandDeliverScRsp(
-                    RetCode=Retcode_pb2.Success,
-                    Type=CommandTypes_pb2.RestartApp
-                )
+                    logger.info(f"Sending RestartApp command to {client_uid}")
+                    await response_queue.put(ClientCommandDeliverScRsp_pb2.ClientCommandDeliverScRsp(
+                        RetCode=Retcode_pb2.Success,
+                        Type=CommandTypes_pb2.RestartApp
+                    ))
+            except asyncio.CancelledError:
+                logger.info(f"send_commands task cancelled for {client_uid}")
+            except Exception as e:
+                logger.exception(f"Error in send_commands: {e}")
+            finally:
+                logger.debug(f"send_commands task finished for {client_uid}")
+
+        # Create tasks and add to a set
+        tasks = {
+            asyncio.create_task(handle_client_messages()),
+            asyncio.create_task(send_commands()),
+        }
+
+        # Cancellation handling:  This is VERY important.
+        def cancel_tasks(fut):
+            logger.info(f"gRPC context done, cancelling tasks for {client_uid}")
+            for task in tasks:
+                task.cancel()
+            db.clients.get(client_uid, {})["connected"] = False
+
+        context.add_done_callback(cancel_tasks)
+
+
         try:
-            async for response in asyncio.as_completed([handle_client_messages(), send_commands()]):
-                yield await response
-        except asyncio.CancelledError as e:
-            logger.info(f"Client {client_uid} disconnected.")
-            if client_uid and client_uid in db.clients:
-                db.clients[client_uid]["connected"] = False
-            raise e
+            while True:
+                # Get responses from the queue and yield them
+                response = await response_queue.get()
+                yield response
+        except asyncio.CancelledError:
+            logger.info(f"ListenCommand cancelled for {client_uid}")
+            for task in tasks:
+                task.cancel() # Ensure tasks are cancelled.
+            raise
+        except Exception as e:
+            logger.exception(f"Error in ListenCommand: {e}")
+        finally:
+            # Clean up
+            logger.info(f"ListenCommand finished for {client_uid}")
+            db.clients.get(client_uid, {})["connected"] = False
+
 
 # HTTP 服务 (使用 aiohttp)
 from aiohttp import web
 
 routes = web.RouteTableDef()
+
 
 @routes.get('/api/v1/client/{client_uid}/manifest')
 async def get_manifest(request: web.Request):
@@ -132,6 +186,7 @@ async def get_manifest(request: web.Request):
         "OrganizationName": manifest.OrganizationName
         # 添加其他清单字段...
     })
+
 
 async def create_app():
     app = web.Application()
