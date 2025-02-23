@@ -1,4 +1,5 @@
 import json
+import os
 
 import uvicorn
 from fastapi import FastAPI, HTTPException
@@ -8,6 +9,13 @@ api = FastAPI(
     description="<UNK>",
     version="1.0",
 )
+
+DATA_DIR = "Datas"  # 数据存储根目录
+
+# 确保 Datas 目录存在
+os.makedirs(DATA_DIR, exist_ok=True)
+
+RESOURCE_TYPES = ["Manifests", "Policies", "ClassPlans", "SubjectsSource", "TimeLayouts", "DefaultSettings"]
 
 @api.get("/api/v1/client/{client_uid}/manifest", summary="获取客户端配置清单")
 async def get_client_manifest(client_uid: str):
@@ -55,6 +63,71 @@ async def get_settings(client_uid: str):
     with open(f"Datas/DefaultSettings/{client_uid}.json", "r", encoding="utf-8") as f:
         settings = json.load(f)
     return settings
+
+
+# region 资源管理 API (新增)
+
+@api.get("/api/v1/resources/{resource_type}", summary="获取指定资源类型的文件列表")
+async def get_resource_file_list(resource_type: str):
+    """
+    获取指定资源类型目录下的文件列表。
+
+    - **resource_type**: 资源类型 (Manifests, Policies, ClassPlans, SubjectsSource, TimeLayouts, DefaultSettings)
+    """
+    if resource_type not in RESOURCE_TYPES:
+        raise HTTPException(status_code=400, detail="Invalid resource type")
+    resource_dir = os.path.join(DATA_DIR, resource_type)
+    if not os.path.exists(resource_dir) or not os.path.isdir(resource_dir):
+        return []  # 目录不存在或不是目录，返回空列表
+    files = [f for f in os.listdir(resource_dir) if os.path.isfile(os.path.join(resource_dir, f)) and f.endswith(".json")]
+    return files
+
+
+@api.get("/api/v1/resources/{resource_type}/{file_name}", summary="获取指定资源文件的内容")
+async def get_resource_file_content(resource_type: str, file_name: str):
+    """
+    获取指定资源文件的内容。
+
+    - **resource_type**: 资源类型 (Manifests, Policies, ClassPlans, SubjectsSource, TimeLayouts, DefaultSettings)
+    - **file_name**: 文件名 (例如：example.json)
+    """
+    if resource_type not in RESOURCE_TYPES:
+        raise HTTPException(status_code=400, detail="Invalid resource type")
+    resource_dir = os.path.join(DATA_DIR, resource_type)
+    file_path = os.path.join(resource_dir, file_name)
+    if not os.path.exists(file_path) or not os.path.isfile(file_path):
+        raise HTTPException(status_code=404, detail="File not found")
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            content = json.load(f)
+        return content
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=400, detail="Invalid JSON file")
+
+
+@api.post("/api/v1/resources/{resource_type}/{file_name}", summary="保存指定资源文件的内容")
+async def save_resource_file_content(resource_type: str, file_name: str, content: dict):
+    """
+    保存指定资源文件的内容。
+
+    - **resource_type**: 资源类型 (Manifests, Policies, ClassPlans, SubjectsSource, TimeLayouts, DefaultSettings)
+    - **file_name**: 文件名 (例如：example.json)
+    - **content**: 文件内容 (JSON 格式)
+    """
+    if resource_type not in RESOURCE_TYPES:
+        raise HTTPException(status_code=400, detail="Invalid resource type")
+    resource_dir = os.path.join(DATA_DIR, resource_type)
+    os.makedirs(resource_dir, exist_ok=True)  # 确保目录存在
+    file_path = os.path.join(resource_dir, file_name)
+    try:
+        with open(file_path, "w", encoding="utf-8") as f:
+            json.dump(content, f, indent=4, ensure_ascii=False)
+        return {"message": f"File '{file_name}' in '{resource_type}' saved successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to save file: {e}")
+
+
+# endregion
 
 async def start():
     """<UNK>FastAPI<UNK>"""

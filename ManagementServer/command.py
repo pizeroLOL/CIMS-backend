@@ -77,9 +77,9 @@ async def get_all_client_status():
             print(f"清理离线客户端：{k}")
             del status[k]
             save_client_status(status)
-            clients = load_clients()
-            del clients[k]
-            save_clients(clients)
+            # clients = load_clients()
+            # del clients[k]
+            # save_clients(clients)
 
     return status
 
