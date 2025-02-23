@@ -58,13 +58,13 @@ command = FastAPI(title="ClassIsland Management Server",
                   version="1.0.0", )
 
 
-@command.get("/clients", summary="获取所有已注册客户端")
+@command.get("/command/clients", summary="获取所有已注册客户端")
 async def get_clients():
     """获取所有已注册的客户端列表"""
     return load_clients()
 
 
-@command.get("/clients/status", summary="获取所有客户端状态")
+@command.get("/command/clients/status", summary="获取所有客户端状态")
 async def get_all_client_status():
     """
     获取所有客户端的状态。
@@ -84,7 +84,7 @@ async def get_all_client_status():
     return status
 
 
-@command.get("/clients/{client_uid}/status", summary="获取指定客户端状态")
+@command.get("/command/clients/{client_uid}/status", summary="获取指定客户端状态")
 async def get_client_status(client_uid: str):
     """
     获取指定客户端的状态。
@@ -97,7 +97,7 @@ async def get_client_status(client_uid: str):
     return status[client_uid]
 
 
-@command.post("/clients/{client_uid}/restart", summary="重启指定客户端")
+@command.post("/command/clients/{client_uid}/restart", summary="重启指定客户端")
 async def restart_client(client_uid: str):
     """
     对指定客户端执行重新启动操作。
@@ -108,7 +108,7 @@ async def restart_client(client_uid: str):
     return {"message": f"Restart command sent to client: {client_uid}"}
 
 
-@command.post("/clients/{client_uid}/notify", summary="向指定客户端发送消息")
+@command.post("/command/clients/{client_uid}/notify", summary="向指定客户端发送消息")
 async def send_notification(client_uid: str,
                             message_mask: str,
                             message_content: str,
@@ -155,7 +155,7 @@ async def send_notification(client_uid: str,
     return {"message": f"Notification sent to client: {client_uid}"}
 
 
-@command.post("/clients/{client_uid}/update", summary="更新指定客户端数据")
+@command.post("/command/clients/{client_uid}/update", summary="更新指定客户端数据")
 async def update_client_data(client_uid: str):
     """
     对指定客户端执行更新数据操作。

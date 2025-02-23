@@ -6,7 +6,13 @@ import json
 
 
 class Logger:
+    """
+    Enhanced Logger
+    """
     def __init__(self):
+        """
+        Enhanced logger
+        """
         self.logger_file = None
         self.log_header = """    Log from {project_name} with MINI Logger
 
@@ -24,7 +30,7 @@ class Logger:
         :param status: Recommend from QuickValues.Log, need 4 alphabets.
         :return:
         """
-        message = message + " "
+        message += " "
         try:
             self.logger_file = open("logs/{}.log".format(datetime.now().strftime("%Y-%m-%d %H")), "a")
         except FileNotFoundError:
@@ -99,5 +105,8 @@ class Logger:
 
 
 class Logs:
+    """
+    Unfinished
+    """
     def __init__(self):
         pass

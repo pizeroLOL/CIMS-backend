@@ -1,7 +1,7 @@
 {
     "SelectedProfile": "Default.json",
     "IsMainWindowVisible": true,
-    "IsWelcomeWindowShowed": true,
+    "IsWelcomeWindowShowed": false,
     "SettingsOverlay": {},
     "SingleWeekStartTime": "2025-02-04T00:00:00",
     "MultiWeekRotationOffset": [

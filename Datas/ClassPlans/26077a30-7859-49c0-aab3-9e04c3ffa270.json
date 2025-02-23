@@ -1,6 +1,4 @@
 {
-    "Name": "",
-    "TimeLayouts": {},
     "ClassPlans": {
         "431f893b-1f5b-4188-ac7c-01097c67ba4e": {
             "TimeLayoutId": "0520a630-ebf8-4466-98ff-0af668331285",
@@ -903,30 +901,5 @@
             },
             "IsActive": false
         }
-    },
-    "Subjects": {},
-    "IsOverlayClassPlanEnabled": true,
-    "OverlayClassPlanId": null,
-    "TempClassPlanId": null,
-    "TempClassPlanSetupTime": "2024-12-12T08:37:48.2118011+08:00",
-    "ClassPlanGroups": {
-        "acaf4ef0-e261-4262-b941-34ea93cb4369": {
-            "Name": "默认",
-            "IsGlobal": false,
-            "IsActive": false
-        },
-        "00000000-0000-0000-0000-000000000000": {
-            "Name": "全局课表群",
-            "IsGlobal": true,
-            "IsActive": false
-        }
-    },
-    "SelectedClassPlanGroupId": "acaf4ef0-e261-4262-b941-34ea93cb4369",
-    "TempClassPlanGroupId": null,
-    "TempClassPlanGroupExpireTime": "2024-08-05T20:08:01.5639121+08:00",
-    "IsTempClassPlanGroupEnabled": false,
-    "TempClassPlanGroupType": 1,
-    "Id": "72c20ee4-b678-435a-aa59-11ae98677d08",
-    "OrderedSchedules": {},
-    "IsActive": false
+    }
 }

@@ -1,7 +1,4 @@
 {
-    "Name": "",
-    "TimeLayouts": {},
-    "ClassPlans": {},
     "Subjects": {
         "97d0bf3f-137f-4f8a-87d6-ff387063bbd3": {
             "Name": "语文",
@@ -796,29 +793,5 @@
             },
             "IsActive": false
         }
-    },
-    "IsOverlayClassPlanEnabled": true,
-    "OverlayClassPlanId": null,
-    "TempClassPlanId": null,
-    "TempClassPlanSetupTime": "2024-12-12T08:37:48.2118011+08:00",
-    "ClassPlanGroups": {
-        "acaf4ef0-e261-4262-b941-34ea93cb4369": {
-            "Name": "默认",
-            "IsGlobal": false,
-            "IsActive": false
-        },
-        "00000000-0000-0000-0000-000000000000": {
-            "Name": "全局课表群",
-            "IsGlobal": true,
-            "IsActive": false
-        }
-    },
-    "SelectedClassPlanGroupId": "acaf4ef0-e261-4262-b941-34ea93cb4369",
-    "TempClassPlanGroupId": null,
-    "TempClassPlanGroupExpireTime": "2024-08-05T20:08:01.5639121+08:00",
-    "IsTempClassPlanGroupEnabled": false,
-    "TempClassPlanGroupType": 1,
-    "Id": "72c20ee4-b678-435a-aa59-11ae98677d08",
-    "OrderedSchedules": {},
-    "IsActive": false
+    }
 }
