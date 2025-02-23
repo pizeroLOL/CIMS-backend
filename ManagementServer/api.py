@@ -1,73 +1,123 @@
 import json
 import os
+import time
 
 import uvicorn
 from fastapi import FastAPI, HTTPException
 
 api = FastAPI(
-    title="Management Server",
-    description="<UNK>",
+    title="Management Server Profiles APIs",
+    description="提供客户端配置文件分发服务\n提供客户端配置文件清单",
     version="1.0",
 )
 
 DATA_DIR = "Datas"  # 数据存储根目录
 
 # 确保 Datas 目录存在
-os.makedirs(DATA_DIR, exist_ok=True)
+os.makedirs("Datas", exist_ok=True)
 
 RESOURCE_TYPES = ["Manifests", "Policies", "ClassPlans", "SubjectsSource", "TimeLayouts", "DefaultSettings"]
 
-@api.get("/api/v1/client/{client_uid}/manifest", summary="获取客户端配置清单")
-async def get_client_manifest(client_uid: str):
+@api.get("/api/client/manifest", summary="获取客户端配置清单")
+async def get_client_manifest(id: str, uid: str, version: int=int(time.time())):
     """获取指定客户端的配置清单"""
-    with open(f"Datas/Manifests/{client_uid}.json", "r", encoding="utf-8") as f:
-        manifest = json.load(f)
-    return manifest
+    with open(f"Datas/profile_config.json", "r", encoding="utf-8") as f:
+        profile_config = json.load(f)
+        try:
+            return {
+                "ClassPlanSource": {
+                    "Value": f"http://127.0.0.1:50050/api/classPlan?name={profile_config["uid"][uid]["ClassPlan"]}",
+                    "Version": version
+                },
+                "TimeLayoutSource": {
+                    "Value": f"http://127.0.0.1:50050/api/timeLayout?name={profile_config["uid"][uid]["TimeLayout"]}",
+                    "Version": version
+                },
+                "SubjectsSource": {
+                    "Value": f"http://127.0.0.1:50050/api/subjects?name={profile_config["uid"][uid]["Subjects"]}",
+                    "Version": version
+                },
+                "DefaultSettingsSource": {
+                    "Value": f"http://127.0.0.1:50050/api/settings?name={profile_config["uid"][uid]["Settings"]}",
+                    "Version": version
+                },
+                "PolicySource": {
+                    "Value": f"http://127.0.0.1:50050/api/policy?name={profile_config["uid"][uid]["Policy"]}",
+                    "Version": version
+                },
+                "ServerKind": 1,
+                "OrganizationName": "CMS2.py 本地测试"
+            }
+        except IndexError:
+            return {
+                "ClassPlanSource": {
+                    "Value": f"http://127.0.0.1:50050/api/classPlan?name={profile_config["id"][id]["ClassPlan"]}",
+                    "Version": version
+                },
+                "TimeLayoutSource": {
+                    "Value": f"http://127.0.0.1:50050/api/timeLayout?name={profile_config["id"][id]["TimeLayout"]}",
+                    "Version": version
+                },
+                "SubjectsSource": {
+                    "Value": f"http://127.0.0.1:50050/api/subjects?name={profile_config["id"][id]["Subjects"]}",
+                    "Version": version
+                },
+                "DefaultSettingsSource": {
+                    "Value": f"http://127.0.0.1:50050/api/settings?name={profile_config["id"][id]["Settings"]}",
+                    "Version": version
+                },
+                "PolicySource": {
+                    "Value": f"http://127.0.0.1:50050/api/policy?name={profile_config["id"][id]["Policy"]}",
+                    "Version": version
+                },
+                "ServerKind": 1,
+                "OrganizationName": "CMS2.py 本地测试"
+            }
 
 
-@api.get("/api/v1/client/{client_uid}/policy", summary="获取策略")
-async def get_policy(client_uid: str):
+@api.get("/api/client/policy", summary="获取策略")
+async def get_policy(name: str):
     """获取服务器策略"""
-    with open(f"Datas/Policies/{client_uid}.json", "r", encoding="utf-8") as f:
+    with open(f"Datas/Policies/{name}.json", "r", encoding="utf-8") as f:
         policy = json.load(f)
     return policy
 
 
-@api.get("/api/v1/client/{client_uid}/classPlan", summary="获取课表")
-async def get_class_plan(client_uid: str):
+@api.get("/api/client/classPlan", summary="获取课表")
+async def get_class_plan(name: str):
     """获取服务器课表"""
-    with open(f"Datas/ClassPlans/{client_uid}.json", "r", encoding="utf-8") as f:
+    with open(f"Datas/ClassPlans/{name}.json", "r", encoding="utf-8") as f:
         class_plan = json.load(f)
     return class_plan
 
 
-@api.get("/api/v1/client/{client_uid}/subjects", summary="获取科目列表")
-async def get_subjects(client_uid: str):
+@api.get("/api/client/subjects", summary="获取科目列表")
+async def get_subjects(name: str):
     """获取科目列表"""
-    with open(f"Datas/SubjectsSource/{client_uid}.json", "r", encoding="utf-8") as f:
+    with open(f"Datas/SubjectsSource/{name}.json", "r", encoding="utf-8") as f:
         subjects = json.load(f)
     return subjects
 
 
-@api.get("/api/v1/client/{client_uid}/timeLayout", summary="获取时间表")
-async def get_time_layout(client_uid: str):
+@api.get("/api/client/timeLayout", summary="获取时间表")
+async def get_time_layout(name: str):
     """获取时间表"""
-    with open(f"Datas/TimeLayouts/{client_uid}.json", "r", encoding="utf-8") as f:
+    with open(f"Datas/TimeLayouts/{name}.json", "r", encoding="utf-8") as f:
         time_layout = json.load(f)
     return time_layout
 
 
-@api.get("/api/v1/client/{client_uid}/settings", summary="获取设置")
-async def get_settings(client_uid: str):
+@api.get("/api/client/settings", summary="获取设置")
+async def get_settings(name: str):
     """获取设置"""
-    with open(f"Datas/DefaultSettings/{client_uid}.json", "r", encoding="utf-8") as f:
+    with open(f"Datas/DefaultSettings/{name}.json", "r", encoding="utf-8") as f:
         settings = json.load(f)
     return settings
 
 
 # region 资源管理 API (新增)
 
-@api.get("/api/v1/resources/{resource_type}", summary="获取指定资源类型的文件列表")
+@api.get("/api/resources/{resource_type}", summary="获取指定资源类型的文件列表")
 async def get_resource_file_list(resource_type: str):
     """
     获取指定资源类型目录下的文件列表。
@@ -83,7 +133,7 @@ async def get_resource_file_list(resource_type: str):
     return files
 
 
-@api.get("/api/v1/resources/{resource_type}/{file_name}", summary="获取指定资源文件的内容")
+@api.get("/api/resources/{resource_type}/{file_name}", summary="获取指定资源文件的内容")
 async def get_resource_file_content(resource_type: str, file_name: str):
     """
     获取指定资源文件的内容。
@@ -105,7 +155,7 @@ async def get_resource_file_content(resource_type: str, file_name: str):
         raise HTTPException(status_code=400, detail="Invalid JSON file")
 
 
-@api.post("/api/v1/resources/{resource_type}/{file_name}", summary="保存指定资源文件的内容")
+@api.post("/api/resources/{resource_type}/{file_name}", summary="保存指定资源文件的内容")
 async def save_resource_file_content(resource_type: str, file_name: str, content: dict):
     """
     保存指定资源文件的内容。

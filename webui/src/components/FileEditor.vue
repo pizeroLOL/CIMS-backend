@@ -52,7 +52,7 @@ export default {
     async fetchFileList() {
       this.errorMessage = null; // 清空错误信息
       try {
-        const response = await axios.get(`/api/v1/resources/${this.fileName}`); // 调用新的文件列表 API
+        const response = await axios.get(`/api/resources/${this.fileName}`); // 调用新的文件列表 API
         this.fileList = response.data;
       } catch (error) {
         console.error(`获取 ${this.fileName} 文件列表失败:`, error);
@@ -63,7 +63,7 @@ export default {
     async loadFileContent(file) {
       this.errorMessage = null; // 清空错误信息
       try {
-        const response = await axios.get(`/api/v1/resources/${this.fileName}/${file}`); // 调用新的获取文件内容 API
+        const response = await axios.get(`/api/resources/${this.fileName}/${file}`); // 调用新的获取文件内容 API
         this.currentFileName = file;
         this.currentFileContent = JSON.stringify(response.data, null, 2); // 格式化 JSON
       } catch (error) {
@@ -77,7 +77,7 @@ export default {
       this.isSaving = true; // 设置为保存中状态
       try {
         const parsedContent = JSON.parse(this.currentFileContent); // 尝试解析 JSON
-        await axios.post(`/api/v1/resources/${this.fileName}/${this.currentFileName}`, { content: parsedContent }); // 调用新的保存文件内容 API，发送 JSON 内容
+        await axios.post(`/api/resources/${this.fileName}/${this.currentFileName}`, { content: parsedContent }); // 调用新的保存文件内容 API，发送 JSON 内容
         alert(`文件 ${this.currentFileName} 已保存`);
       } catch (error) {
         console.error(`保存文件 ${this.currentFileName} 内容失败:`, error);
