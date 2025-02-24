@@ -18,31 +18,31 @@ os.makedirs("Datas", exist_ok=True)
 
 RESOURCE_TYPES = ["Manifests", "Policies", "ClassPlans", "SubjectsSource", "TimeLayouts", "DefaultSettings"]
 
-@api.get("/api/client/manifest", summary="获取客户端配置清单")
-async def get_client_manifest(id: str, uid: str, version: int=int(time.time())):
+@api.get("/api/v1/client/{uid}/manifest", summary="获取客户端配置清单")
+async def get_client_manifest(id: str=None, uid: str=None, version: int=int(time.time())):
     """获取指定客户端的配置清单"""
     with open(f"Datas/profile_config.json", "r", encoding="utf-8") as f:
         profile_config = json.load(f)
         try:
             return {
                 "ClassPlanSource": {
-                    "Value": f"http://127.0.0.1:50050/api/classPlan?name={profile_config["uid"][uid]["ClassPlan"]}",
+                    "Value": f"http://127.0.0.1:50050/api/client/classPlan?name={profile_config["uid"][uid]["ClassPlan"]}",
                     "Version": version
                 },
                 "TimeLayoutSource": {
-                    "Value": f"http://127.0.0.1:50050/api/timeLayout?name={profile_config["uid"][uid]["TimeLayout"]}",
+                    "Value": f"http://127.0.0.1:50050/api/client/timeLayout?name={profile_config["uid"][uid]["TimeLayout"]}",
                     "Version": version
                 },
                 "SubjectsSource": {
-                    "Value": f"http://127.0.0.1:50050/api/subjects?name={profile_config["uid"][uid]["Subjects"]}",
+                    "Value": f"http://127.0.0.1:50050/api/client/subjects?name={profile_config["uid"][uid]["Subjects"]}",
                     "Version": version
                 },
                 "DefaultSettingsSource": {
-                    "Value": f"http://127.0.0.1:50050/api/settings?name={profile_config["uid"][uid]["Settings"]}",
+                    "Value": f"http://127.0.0.1:50050/api/client/settings?name={profile_config["uid"][uid]["Settings"]}",
                     "Version": version
                 },
                 "PolicySource": {
-                    "Value": f"http://127.0.0.1:50050/api/policy?name={profile_config["uid"][uid]["Policy"]}",
+                    "Value": f"http://127.0.0.1:50050/api/client/policy?name={profile_config["uid"][uid]["Policy"]}",
                     "Version": version
                 },
                 "ServerKind": 1,
@@ -51,23 +51,23 @@ async def get_client_manifest(id: str, uid: str, version: int=int(time.time())):
         except IndexError:
             return {
                 "ClassPlanSource": {
-                    "Value": f"http://127.0.0.1:50050/api/classPlan?name={profile_config["id"][id]["ClassPlan"]}",
+                    "Value": f"http://127.0.0.1:50050/api/client/classPlan?name={profile_config["id"][id]["ClassPlan"]}",
                     "Version": version
                 },
                 "TimeLayoutSource": {
-                    "Value": f"http://127.0.0.1:50050/api/timeLayout?name={profile_config["id"][id]["TimeLayout"]}",
+                    "Value": f"http://127.0.0.1:50050/api/client/timeLayout?name={profile_config["id"][id]["TimeLayout"]}",
                     "Version": version
                 },
                 "SubjectsSource": {
-                    "Value": f"http://127.0.0.1:50050/api/subjects?name={profile_config["id"][id]["Subjects"]}",
+                    "Value": f"http://127.0.0.1:50050/api/client/subjects?name={profile_config["id"][id]["Subjects"]}",
                     "Version": version
                 },
                 "DefaultSettingsSource": {
-                    "Value": f"http://127.0.0.1:50050/api/settings?name={profile_config["id"][id]["Settings"]}",
+                    "Value": f"http://127.0.0.1:50050/api/client/settings?name={profile_config["id"][id]["Settings"]}",
                     "Version": version
                 },
                 "PolicySource": {
-                    "Value": f"http://127.0.0.1:50050/api/policy?name={profile_config["id"][id]["Policy"]}",
+                    "Value": f"http://127.0.0.1:50050/api/client/policy?name={profile_config["id"][id]["Policy"]}",
                     "Version": version
                 },
                 "ServerKind": 1,
