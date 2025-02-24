@@ -11,11 +11,23 @@
       <p v-else class="offline-status">
         <span class="status-indicator offline"></span> 离线
       </p>
+
+      <div class="profile-config">
+        <h4>配置文件</h4>
+        <div class="profile-item" v-for="profileType in profileTypes" :key="profileType">
+          <label>{{ profileType }}:</label>
+          <select v-model="clientProfileConfig[profileType]" @change="onProfileConfigChange">
+            <option v-for="name in profileNames[profileType]" :key="name" :value="name">{{ name }}</option>
+          </select>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   name: 'ClientCard',
   props: {
@@ -32,7 +44,70 @@ export default {
       default: false
     }
   },
-  emits: ['select-client']
+  emits: ['select-client'],
+  data() {
+    return {
+      profileTypes: ['ClassPlan', 'Settings', 'Subjects', 'Policy', 'TimeLayout'],
+      profileNames: { // 存储各个 Profile 类型的可用名称
+        'ClassPlan': [],
+        'Settings': [],
+        'Subjects': [],
+        'Policy': [],
+        'TimeLayout': []
+      },
+      clientProfileConfig: {} // 存储客户端的 Profile 配置
+    };
+  },
+  mounted() {
+    this.fetchProfileNames();
+    this.fetchClientProfileConfig();
+  },
+  methods: {
+    async fetchProfileNames() {
+      for (const profileType of this.profileTypes) {
+        try {
+          const response = await axios.get(`/api/v1/profiles/names/${profileType}`);
+          this.profileNames[profileType] = response.data;
+        } catch (error) {
+          console.error(`获取 ${profileType} 配置文件名列表失败:`, error);
+          this.profileNames[profileType] = [];
+        }
+      }
+    },
+    async fetchClientProfileConfig() {
+      try {
+        const response = await axios.get(`/api/v1/client/${this.clientUid}/profileConfig`);
+        this.clientProfileConfig = response.data;
+        // 初始化配置，如果某些 profileType 没有配置，则设置为 "default"
+        this.profileTypes.forEach(type => {
+          if (!this.clientProfileConfig[type]) {
+            // 使用直接赋值替换 this.$set
+            this.clientProfileConfig[type] = 'default';
+          }
+        });
+      } catch (error) {
+        console.error(`获取客户端 ${this.clientUid} 配置文件失败:`, error);
+        this.clientProfileConfig = {};
+        // 初始化配置为 "default"
+        this.profileTypes.forEach(type => {
+          // 使用直接赋值替换 this.$set
+          this.clientProfileConfig[type] = 'default';
+        });
+      }
+    },
+    async saveClientProfileConfig() {
+      try {
+        await axios.post(`/api/v1/client/${this.clientUid}/profileConfig`, this.clientProfileConfig);
+        alert(`客户端 ${this.clientUid} 配置文件已保存`);
+      } catch (error) {
+        console.error(`保存客户端 ${this.clientUid} 配置文件失败:`, error);
+        alert(`保存客户端 ${this.clientUid} 配置文件失败`);
+      }
+    },
+    onProfileConfigChange() {
+      this.saveClientProfileConfig(); // 每次配置更改后自动保存
+    }
+  }
 };
 </script>
 
@@ -83,5 +158,30 @@ export default {
 
 .offline-status .status-indicator {
   background-color: #dc3545; /* Red for offline */
+}
+
+.profile-config {
+  margin-top: 15px;
+  border-top: 1px solid #eee;
+  padding-top: 15px;
+}
+
+.profile-item {
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.profile-item label {
+  margin-right: 10px;
+  width: 80px;
+  text-align: right;
+}
+
+.profile-item select {
+  flex-grow: 1;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
 }
 </style>

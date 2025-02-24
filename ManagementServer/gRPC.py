@@ -20,12 +20,27 @@ from Protobuf.Service import (ClientCommandDeliver_pb2_grpc,
 DATA_DIR = "Datas"
 CLIENTS_FILE = os.path.join(DATA_DIR, "clients.json")
 CLIENT_STATUS_FILE = os.path.join(DATA_DIR, "client_status.json")
+PROFILE_CONFIG_FILE = os.path.join(DATA_DIR, "profile_config.json") # 新增配置文件路径
 
 # 确保数据目录存在
 os.makedirs(DATA_DIR, exist_ok=True)
 
+# region 配置文件操作函数 (新增)
+def load_profile_config():
+    """加载配置文件"""
+    if os.path.exists(PROFILE_CONFIG_FILE):
+        with open(PROFILE_CONFIG_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return {}
 
-# region 数据操作函数
+def save_profile_config(profile_config):
+    """保存配置文件"""
+    with open(PROFILE_CONFIG_FILE, "w", encoding="utf-8") as f:
+        json.dump(profile_config, f, indent=4, ensure_ascii=False)
+
+# endregion
+
+# region 数据操作函数 (保持不变)
 def load_clients():
     """加载客户端列表"""
     if os.path.exists(CLIENTS_FILE):
@@ -53,9 +68,11 @@ def save_client_status(status):
     with open(CLIENT_STATUS_FILE, "w", encoding="utf-8") as f:
         json.dump(status, f, indent=4, ensure_ascii=False)
 
+# endregion
+
 
 class ClientCommandDeliverServicer(ClientCommandDeliver_pb2_grpc.ClientCommandDeliverServicer):
-    """客户端命令传递服务"""
+    """客户端命令传递服务 (保持不变)"""
     _instance = None  # 单例实例
 
     def __new__(cls, *args, **kwargs):
@@ -113,7 +130,7 @@ class ClientCommandDeliverServicer(ClientCommandDeliver_pb2_grpc.ClientCommandDe
 
 
 async def send_command(client_uid: str, command_type: CommandTypes_pb2.CommandTypes, payload: bytes = b''):
-    """向指定客户端发送命令"""
+    """向指定客户端发送命令 (保持不变)"""
     servicer = ClientCommandDeliverServicer()  # 获取单例实例
     if client_uid not in servicer.clients:
         raise HTTPException(status_code=404, detail=f"Client not found or not connected: {client_uid}")
@@ -126,7 +143,7 @@ async def send_command(client_uid: str, command_type: CommandTypes_pb2.CommandTy
 
 
 class ClientRegisterServicer(ClientRegister_pb2_grpc.ClientRegisterServicer):
-    """客户端注册服务"""
+    """客户端注册服务 (修改)"""
 
     async def Register(self, request: ClientRegisterCsReq_pb2.ClientRegisterCsReq,
                        context: grpc.aio.ServicerContext) -> ClientRegisterScRsp_pb2.ClientRegisterScRsp:
@@ -150,17 +167,30 @@ class ClientRegisterServicer(ClientRegister_pb2_grpc.ClientRegisterServicer):
             "lastHeartbeat": time.time()
         }
         save_client_status(client_status)
+
+        # 应用默认配置文件
+        profile_config = load_profile_config()
+        if client_uid not in profile_config:
+            profile_config[client_uid] = { # 应用默认配置
+                "ClassPlan": "default",
+                "Settings": "default",
+                "Subjects": "default",
+                "Policy": "default",
+                "TimeLayout": "default"
+            }
+            save_profile_config(profile_config)
+
         return ClientRegisterScRsp_pb2.ClientRegisterScRsp(Retcode=Retcode_pb2.Success,
                                                            Message=f"Client registered: {client_uid}")
 
     async def UnRegister(self, request, context):
-        """客户端注销 (未实现)"""
+        """客户端注销 (未实现) (保持不变)"""
         # 在实际应用中，你可能需要在这里实现注销逻辑，例如从clients.json中移除客户端
         return ClientRegisterScRsp_pb2.ClientRegisterScRsp(Retcode=Retcode_pb2.ServerInternalError,
                                                            Message="Not implemented")
 
 async def start():
-    """启动gRPC服务器"""
+    """启动gRPC服务器 (保持不变)"""
     server = grpc.aio.server()
     ClientRegister_pb2_grpc.add_ClientRegisterServicer_to_server(ClientRegisterServicer(), server)
     ClientCommandDeliver_pb2_grpc.add_ClientCommandDeliverServicer_to_server(ClientCommandDeliverServicer(), server)

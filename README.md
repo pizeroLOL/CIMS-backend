@@ -13,7 +13,7 @@
 
 ***由于 ClassIsland 本身集控并未完工，服务器侧的刷新配置文件无法在发行版中生效，请注意***
 
-***当前配置文件对接方式发生变更，暂时不可用，请使用上一个 commit 的版本***
+***当前配置文件对接方式发生变更，相关的管理晚些时候上线***
 
 ## Star 历史
 [![Stargazers over time](https://starchart.cc/kaokao221/ClassIslandManagementServer.py.svg?variant=adaptive)](https://starchart.cc/kaokao221/ClassIslandManagementServer.py)

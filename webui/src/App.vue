@@ -26,20 +26,29 @@
       </nav>
     </aside>
     <main class="main-content">
-      <router-view/>
+      <router-view />
     </main>
+    <app-notification ref="notification" />
   </div>
 </template>
 
 <script>
+import AppNotification from './components/AppNotification.vue';
+
 export default {
-  name: 'App',
   components: {
+    AppNotification
+  },
+  methods: {
+    showNotification(message, type = 'info', duration = 3000) {
+      this.$refs.notification.showNotification(message, type, duration);
+    }
   }
 };
 </script>
 
 <style>
+/* 基础样式重置 */
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   margin: 0;
@@ -49,23 +58,23 @@ body {
 }
 
 #app {
-  display: flex; /* 使用 Flexbox 布局 */
-  max-width: 1600px; /* 增大最大宽度 */
+  display: flex;
+  max-width: 1600px;
   margin: 20px auto;
   background-color: #fff;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
-  overflow: hidden; /* 确保圆角正确显示 */
+  overflow: hidden;
 }
 
 /* 侧边栏样式 */
 .sidebar {
-  width: 250px; /* 固定宽度 */
-  background-color: #f8f9fa; /* 浅灰色背景 */
+  width: 250px;
+  background-color: #f8f9fa;
   border-right: 1px solid #eee;
   padding: 20px;
   display: flex;
-  flex-direction: column; /* 垂直布局 */
+  flex-direction: column;
 }
 
 .sidebar-header {
@@ -81,7 +90,7 @@ body {
 
 .sidebar-header h3 {
   margin: 0;
-  color: #0078d4; /* 品牌主色 */
+  color: #0078d4;
 }
 
 .main-nav ul {
@@ -110,21 +119,18 @@ body {
 
 .main-nav a:hover,
 .main-nav a.router-link-active {
-  background-color: #e9ecef; /* 悬停和激活状态背景色 */
-  color: #0078d4; /* 悬停和激活状态文字颜色 */
+  background-color: #e9ecef;
+  color: #0078d4;
 }
-
 
 /* 主内容区域样式 */
 .main-content {
-  flex-grow: 1; /* 占据剩余空间 */
+  flex-grow: 1;
   padding: 20px;
 }
 
-.home {
-  padding: 20px;
-}
-
+/* 页面内容基础样式 */
+.home,
 .clients-view,
 .resources-view {
   padding: 20px;

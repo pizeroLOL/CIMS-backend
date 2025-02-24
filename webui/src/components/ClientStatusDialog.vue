@@ -2,9 +2,11 @@
   <div v-if="clientStatus" class="client-status-dialog">
     <div class="dialog-content">
       <h3>客户端状态 - UID: {{ clientUid }}</h3>
+      <p><strong>客户端ID:</strong> {{ clientId }}</p>
       <p><strong>在线状态:</strong> {{ clientStatus.isOnline ? '在线' : '离线' }}</p>
       <p><strong>上次心跳:</strong> {{ new Date(clientStatus.lastHeartbeat * 1000).toLocaleString() }}</p>
 
+      <ClientCard :clientUid="clientUid" :clientId="clientId" :isOnline="clientStatus.isOnline" />
       <CommandPanel :clientUid="clientUid" />
 
       <button @click="$emit('close')">关闭</button>
@@ -15,14 +17,20 @@
 <script>
 import axios from 'axios';
 import CommandPanel from './CommandPanel.vue';
+import ClientCard from './ClientCard.vue'; // 导入 ClientCard
 
 export default {
   name: 'ClientStatusDialog',
   components: {
-    CommandPanel
+    CommandPanel,
+    ClientCard // 注册 ClientCard
   },
   props: {
     clientUid: {
+      type: String,
+      required: true
+    },
+    clientId: { // 接收 clientId prop
       type: String,
       required: true
     }
@@ -70,6 +78,8 @@ export default {
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 .dialog-content h3 {

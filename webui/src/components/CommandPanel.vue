@@ -31,11 +31,11 @@ export default {
   methods: {
     async restartClient() {
       try {
-        await axios.post(`/command/clients/${this.clientUid}/restart`); // 使用 POST 请求和正确接口
-        alert(`已向客户端 ${this.clientUid} 发送重启命令`);
+        await axios.post(`/command/clients/${this.clientUid}/restart`);
+        this.$parent.showNotification(`已向客户端 ${this.clientUid} 发送重启命令`, 'success'); // 替换 alert
       } catch (error) {
         console.error("发送重启命令失败:", error);
-        alert("发送重启命令失败");
+        this.$parent.showNotification("发送重启命令失败", 'error'); // 替换 alert
       }
     },
     openNotificationDialog() {
@@ -43,11 +43,11 @@ export default {
     },
     async updateClientData() {
       try {
-        await axios.post(`/command/clients/${this.clientUid}/update`); // 使用 POST 请求和正确接口
-        alert(`已向客户端 ${this.clientUid} 发送数据更新命令`);
+        await axios.post(`/command/clients/${this.clientUid}/update`);
+        this.$parent.showNotification(`已向客户端 ${this.clientUid} 发送数据更新命令`, 'success'); // 替换 alert
       } catch (error) {
         console.error("发送数据更新命令失败:", error);
-        alert("发送数据更新命令失败");
+        this.$parent.showNotification("发送数据更新命令失败", 'error'); // 替换 alert
       }
     }
   }
