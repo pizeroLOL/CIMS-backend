@@ -1,23 +1,29 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
-import ClientsView from '../views/ClientsView.vue'
-import ResourcesView from '../views/ResourcesView.vue'
+import OverviewView from '../views/OverviewView.vue'
+import DeviceManagementView from '../views/DeviceManagementView.vue'
+import ResourceManagementView from '../views/ResourceManagementView.vue'
+import SettingsView from '../views/SettingsView.vue'
 
 const routes = [
   {
     path: '/',
-    name: 'home',
-    component: HomeView
+    name: 'Overview',
+    component: OverviewView
   },
   {
-    path: '/clients',
-    name: 'clients',
-    component: ClientsView
+    path: '/devices',
+    name: 'DeviceManagement',
+    component: DeviceManagementView
   },
   {
     path: '/resources',
-    name: 'resources',
-    component: ResourcesView
+    name: 'ResourceManagement',
+    component: ResourceManagementView
+  },
+  {
+    path: '/settings',
+    name: 'Settings',
+    component: SettingsView
   }
 ]
 
