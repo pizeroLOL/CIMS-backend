@@ -1,1 +1,1 @@
-from Datas import reader, write
+from Datas import get
