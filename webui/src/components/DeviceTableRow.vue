@@ -6,8 +6,8 @@
       <span v-if="isOnline" class="status-online">在线</span>
       <span v-else class="status-offline">离线</span>
     </td>
-    <td>晚自习</td> <!-- 示例数据，实际数据可能需要从后端获取 -->
-    <td><a href="#">管理 ></a></td>
+    <td>晚自习</td>
+    <td><a @click="$emit('open-management', clientUid)" style="cursor: pointer;">管理 ></a></td> <!-- 修改后的管理链接 -->
   </tr>
 </template>
 
@@ -27,7 +27,8 @@ export default {
       type: Boolean,
       default: false
     }
-  }
+  },
+  emits: ['open-management'] // 声明组件会触发 'open-management' 事件
 }
 </script>
 

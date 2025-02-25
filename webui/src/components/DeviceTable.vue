@@ -17,19 +17,23 @@
           :clientId="clientId"
           :clientUid="clientUid"
           :isOnline="getClientOnlineStatus(clientUid)"
+          @open-management="openManagementDialog"
         />
       </tbody>
     </table>
+    <ClientStatusDialog v-if="isManagingClient" :clientUid="managingClientUid" @close="closeManagementDialog" /> <!-- 设备管理对话框 -->
   </div>
 </template>
 
 <script>
 import DeviceTableRow from './DeviceTableRow.vue';
+import ClientStatusDialog from './ClientStatusDialog.vue'; // 导入 ClientStatusDialog
 
 export default {
   name: 'DeviceTable',
   components: {
-    DeviceTableRow
+    DeviceTableRow,
+    ClientStatusDialog // 注册 ClientStatusDialog
   },
   props: {
     clients: {
@@ -41,9 +45,25 @@ export default {
       required: true
     }
   },
+  data() {
+    return {
+      managingClientUid: null // 当前正在管理的客户端 UID
+    };
+  },
+  computed: {
+    isManagingClient() {
+      return !!this.managingClientUid; // managingClientUid 有值时返回 true，否则返回 false
+    }
+  },
   methods: {
     getClientOnlineStatus(clientUid) {
       return this.clientStatuses && this.clientStatuses[clientUid] ? this.clientStatuses[clientUid].isOnline : false;
+    },
+    openManagementDialog(clientUid) {
+      this.managingClientUid = clientUid; // 设置 managingClientUid，显示对话框
+    },
+    closeManagementDialog() {
+      this.managingClientUid = null; // 清空 managingClientUid，关闭对话框
     }
   }
 };
