@@ -22,7 +22,7 @@ export default {
   },
   mounted() {
     this.fetchData();
-    this.interval = setInterval(this.fetchData, 10000); // 每 10 秒更新数据
+    this.interval = setInterval(this.fetchData, 10000);
   },
   beforeUnmount() {
     clearInterval(this.interval);
@@ -42,8 +42,6 @@ export default {
 };
 </script>
 
-<style scoped>
-.device-management-view {
-  padding: 20px;
-}
+<style>
+/* 可以在全局 CSS 或组件的 style 中添加 Web Components 的样式 */
 </style>

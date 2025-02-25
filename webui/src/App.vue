@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <Sidebar />
+    <SideBarMenu />
     <div class="content-area">
       <router-view />
     </div>
@@ -13,22 +13,28 @@ import SideBarMenu from './components/SideBarMenu.vue'
 export default {
   name: 'App',
   components: {
-    Sidebar: SideBarMenu
+    SideBarMenu
   }
 }
 </script>
 
-<style scoped>
+<style>
+/* 全局样式，因为 Web Components 的 scoped 样式可能不太适用 */
+body {
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
 #app {
   display: flex;
-  font-family: '微软雅黑', sans-serif;
   height: 100vh;
   overflow: hidden;
 }
 
 .content-area {
   flex: 1;
-  background-color: #e0f7fa; /* 淡蓝色背景 */
+  background-color: #f3f2f1; /* Fluent UI Light Gray Background */
   padding: 20px;
   overflow-y: auto;
 }

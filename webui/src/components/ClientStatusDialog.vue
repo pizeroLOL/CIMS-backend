@@ -1,15 +1,18 @@
-        <template>
-  <div v-if="clientStatus" class="client-status-dialog">
-    <div class="dialog-content">
-      <h3>客户端状态 - UID: {{ clientUid }}</h3>
+<template>
+  <fluent-dialog :hidden="!show" @dismiss="closeDialog" title-text="客户端状态 - UID: {{ clientUid }}" is-modeless>
+    <template v-slot:title>  <!-- 替换为 <template v-slot:title> -->
+      客户端状态 - UID: {{ clientUid }}
+    </template>
+    <template v-slot:body>   <!-- 替换为 <template v-slot:body> -->
       <p><strong>在线状态:</strong> {{ clientStatus.isOnline ? '在线' : '离线' }}</p>
       <p><strong>上次心跳:</strong> {{ new Date(clientStatus.lastHeartbeat * 1000).toLocaleString() }}</p>
 
       <CommandPanel :clientUid="clientUid" />
-
-      <button @click="$emit('close')">关闭</button>
-    </div>
-  </div>
+    </template>
+    <template v-slot:footer>  <!-- 替换为 <template v-slot:footer> -->
+      <fluent-button @click="closeDialog">关闭</fluent-button>
+    </template>
+  </fluent-dialog>
 </template>
 
 <script>
@@ -25,6 +28,10 @@ export default {
     clientUid: {
       type: String,
       required: true
+    },
+    show: {
+      type: Boolean,
+      default: true
     }
   },
   emits: ['close'],
@@ -45,40 +52,14 @@ export default {
         console.error("获取客户端状态失败:", error);
         this.clientStatus = null;
       }
+    },
+    closeDialog() {
+      this.$emit('close');
     }
   }
 };
 </script>
 
-<style scoped>
-.client-status-dialog {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.dialog-content {
-  background-color: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  width: 500px;
-}
-
-.dialog-content h3 {
-  margin-top: 0;
-}
-
-.dialog-content button {
-  margin-top: 15px;
-  padding: 8px 15px;
-  cursor: pointer;
-}
+<style>
+/* 可以在全局 CSS 或组件的 style 中添加 Web Components 的样式 */
 </style>

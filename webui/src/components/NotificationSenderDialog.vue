@@ -1,33 +1,31 @@
 <template>
-  <div class="notification-dialog" v-if="show">
-    <div class="dialog-content">
-      <h3>发送通知 - 客户端 UID: {{ clientUid }}</h3>
-      <label for="messageMask">消息遮罩:</label>
-      <input type="text" id="messageMask" v-model="notificationData.message_mask">
-
-      <label for="messageContent">消息内容:</label>
-      <textarea id="messageContent" v-model="notificationData.message_content"></textarea>
-
-      <div class="checkbox-group">
-        <label><input type="checkbox" v-model="notificationData.is_emergency"> 紧急消息</label>
-        <label><input type="checkbox" v-model="notificationData.is_speech_enabled"> 语音播报</label>
-        <label><input type="checkbox" v-model="notificationData.is_effect_enabled"> 特效</label>
-        <label><input type="checkbox" v-model="notificationData.is_sound_enabled"> 声音</label>
-        <label><input type="checkbox" v-model="notificationData.is_topmost"> 置顶显示</label>
-      </div>
-
-      <label for="durationSeconds">显示持续时间 (秒):</label>
-      <input type="number" id="durationSeconds" v-model.number="notificationData.duration_seconds">
-
-      <label for="repeatCounts">重复次数:</label>
-      <input type="number" id="repeatCounts" v-model.number="notificationData.repeat_counts">
-
-      <div class="buttons">
-        <button @click="sendNotification">发送通知</button>
-        <button @click="closeDialog">取消</button>
-      </div>
-    </div>
-  </div>
+  <fluent-dialog v-if="show" @dismiss="closeDialog" title-text="发送通知" is-modeless>
+    <template v-slot:body>
+      <fluent-form>
+        <fluent-form-group label="消息遮罩:">
+          <fluent-text-field v-model="notificationData.message_mask" placeholder="请输入消息遮罩"></fluent-text-field>
+        </fluent-form-group>
+        <fluent-form-group label="消息内容:">
+          <fluent-textarea v-model="notificationData.message_content" placeholder="请输入消息内容" resizable></fluent-textarea>
+        </fluent-form-group>
+        <fluent-form-group label="提醒设置:">
+          <fluent-checkbox v-model="notificationData.is_emergency" label="紧急消息"></fluent-checkbox>
+          <fluent-checkbox v-model="notificationData.is_speech_enabled" label="语音播报"></fluent-checkbox>
+          <fluent-checkbox v-model="notificationData.is_effect_enabled" label="特效"></fluent-checkbox>
+          <fluent-checkbox v-model="notificationData.is_sound_enabled" label="声音"></fluent-checkbox>
+          <fluent-checkbox v-model="notificationData.is_topmost" label="置顶显示"></fluent-checkbox>
+        </fluent-form-group>
+        <fluent-form-group label="显示设置:">
+          <fluent-number-field v-model.number="notificationData.duration_seconds" label="持续时间 (秒)" min="1" step="1"></fluent-number-field>
+          <fluent-number-field v-model.number="notificationData.repeat_counts" label="重复次数" min="1" step="1"></fluent-number-field>
+        </fluent-form-group>
+      </fluent-form>
+    </template>
+    <template v-slot:footer>
+      <fluent-button @click="sendNotification" appearance="primary">发送通知</fluent-button>
+      <fluent-button @click="closeDialog">取消</fluent-button>
+    </template>
+  </fluent-dialog>
 </template>
 
 <script>
@@ -68,13 +66,12 @@ export default {
       try {
         const queryParams = new URLSearchParams(this.notificationData).toString();
         const url = `/command/clients/${this.clientUid}/notify?${queryParams}`;
-
         await axios.post(url);
-        this.$parent.showNotification(`已向客户端 ${this.clientUid} 发送通知`, 'success'); // 替换 alert
+        alert(`已向客户端 ${this.clientUid} 发送通知`);
         this.closeDialog();
       } catch (error) {
         console.error("发送通知失败:", error);
-        this.$parent.showNotification("发送通知失败", 'error'); // 替换 alert
+        alert("发送通知失败");
       }
     },
     closeDialog() {
@@ -83,3 +80,7 @@ export default {
   }
 };
 </script>
+
+<style>
+/* 可以在全局 CSS 或组件的 style 中添加 Web Components 的样式 */
+</style>
