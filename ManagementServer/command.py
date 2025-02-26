@@ -166,9 +166,9 @@ async def update_client_data(client_uid: str):
     return {"message": f"Data update command sent to client: {client_uid}"}
 
 
-async def start():
+async def start(port=50052):
     """启动FastAPI服务器"""
-    config = uvicorn.Config(app=command, host="127.0.0.1", port=50052, log_level="debug")
+    config = uvicorn.Config(app=command, port=port, log_level="debug")
     server = uvicorn.Server(config)
     print("Starting Command server...")
     await server.serve()
