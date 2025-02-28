@@ -25,7 +25,7 @@ async def get_client_manifest(uid: str=None, version: int=int(time.time())):
         profile_config = Datas.ProfileConfig.profile_config
         _return =  {
             "ClassPlanSource": {
-                "Value": f"http://127.0.0.1:50050/api/v1/client/classPlan?name={profile_config[uid]["ClassPlan"]}", # 使用 client_profile 中的配置，默认为 default
+                "Value": f"http://127.0.0.1:50050/api/v1/client/classPlan?name={profile_config[uid]['ClassPlan']}", # 使用 client_profile 中的配置，默认为 default
                 "Version": version
             },
             "TimeLayoutSource": {
