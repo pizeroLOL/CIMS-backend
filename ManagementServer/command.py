@@ -2,6 +2,7 @@ import asyncio
 import json
 import os
 import time
+import Datas
 
 import uvicorn
 from fastapi import FastAPI, HTTPException
@@ -28,10 +29,7 @@ os.makedirs(DATA_DIR, exist_ok=True)
 # region 数据操作函数
 def load_clients():
     """加载客户端列表"""
-    if os.path.exists(CLIENTS_FILE):
-        with open(CLIENTS_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    return {}
+    return Datas.Clients.refresh()
 
 
 def save_clients(clients):
@@ -168,7 +166,7 @@ async def update_client_data(client_uid: str):
 
 async def start(port=50052):
     """启动FastAPI服务器"""
-    config = uvicorn.Config(app=command, port=port, log_level="debug")
+    config = uvicorn.Config(app=command, port=port, host="0.0.0.0", log_level="debug")
     server = uvicorn.Server(config)
     print("Starting Command server...")
     await server.serve()

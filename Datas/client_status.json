@@ -1,1 +1,14 @@
-{}
+{
+    "8b3951d1-3890-4278-9cb2-f2064ab40037": {
+        "isOnline": false,
+        "lastHeartbeat": 1740548295.3672082
+    },
+    "66714ff9-8c04-46e0-bcde-b00d7287e0eb": {
+        "isOnline": false,
+        "lastHeartbeat": 1740582970.7208157
+    },
+    "8bcc4413-cd4d-4f8e-adf5-ee4dbb58558d": {
+        "isOnline": true,
+        "lastHeartbeat": 1740612258.7720907
+    }
+}

@@ -194,7 +194,7 @@ async def start(port=50051):
     server = grpc.aio.server()
     ClientRegister_pb2_grpc.add_ClientRegisterServicer_to_server(ClientRegisterServicer(), server)
     ClientCommandDeliver_pb2_grpc.add_ClientCommandDeliverServicer_to_server(ClientCommandDeliverServicer(), server)
-    listen_addr = f'127.0.0.1:{port}'
+    listen_addr = f'0.0.0.0:{port}'
     server.add_insecure_port(listen_addr)
     print(f"Starting gRPC server on {listen_addr}")
     await server.start()
