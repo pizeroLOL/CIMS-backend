@@ -35,7 +35,7 @@ def load_clients():
 def save_clients(clients):
     """保存客户端列表"""
     with open(CLIENTS_FILE, "w", encoding="utf-8") as f:
-        json.dump(clients, f, indent=4, ensure_ascii=False)
+        json.dump(clients, f, indent=4, ensure_ascii=True)
 
 
 def load_client_status():
@@ -49,7 +49,7 @@ def load_client_status():
 def save_client_status(status):
     """保存客户端状态"""
     with open(CLIENT_STATUS_FILE, "w", encoding="utf-8") as f:
-        json.dump(status, f, indent=4, ensure_ascii=False)
+        json.dump(status, f, indent=4, ensure_ascii=True)
 
 command = FastAPI(title="ClassIsland Management Server",
                   description="集控服务器API",
@@ -106,7 +106,7 @@ async def restart_client(client_uid: str):
     return {"message": f"Restart command sent to client: {client_uid}"}
 
 
-@command.get("/command/clients/{client_uid}/notify", summary="向指定客户端发送消息")
+@command.post("/command/clients/{client_uid}/notify", summary="向指定客户端发送消息")
 async def send_notification(client_uid: str,
                             message_mask: str,
                             message_content: str,

@@ -36,7 +36,7 @@ def load_profile_config():
 def save_profile_config(profile_config):
     """保存配置文件"""
     with open(PROFILE_CONFIG_FILE, "w", encoding="utf-8") as f:
-        json.dump(profile_config, f, indent=4, ensure_ascii=False)
+        json.dump(profile_config, f, indent=4, ensure_ascii=True)
 
 # endregion
 
@@ -52,7 +52,7 @@ def load_clients():
 def save_clients(clients):
     """保存客户端列表"""
     with open(CLIENTS_FILE, "w", encoding="utf-8") as f:
-        json.dump(clients, f, indent=4, ensure_ascii=False)
+        json.dump(clients, f, indent=4, ensure_ascii=True)
 
 
 def load_client_status():
@@ -66,7 +66,7 @@ def load_client_status():
 def save_client_status(status):
     """保存客户端状态"""
     with open(CLIENT_STATUS_FILE, "w", encoding="utf-8") as f:
-        json.dump(status, f, indent=4, ensure_ascii=False)
+        json.dump(status, f, indent=4, ensure_ascii=True)
 
 # endregion
 

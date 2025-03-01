@@ -11,11 +11,11 @@ interface ConfigManifest {
 }
 
 const resourceTypes = [
-  { key: 'ClassPlans', label: '课表' },
-  { key: 'TimeLayouts', label: '时间布局' },
-  { key: 'SubjectsSource', label: '科目' },
-  { key: 'DefaultSettingsSource', label: '默认设置' },
-  { key: 'PolicySource', label: '策略' },
+  { key: 'classPlans', label: '课表' },
+  { key: 'timeLayouts', label: '时间布局' },
+  { key: 'subjectsSource', label: '科目' },
+  { key: 'defaultSettingsSource', label: '默认设置' },
+  { key: 'policySource', label: '策略' },
 ];
 
 const ConfigurationManagement: React.FC = () => {
