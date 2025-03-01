@@ -3,6 +3,7 @@ import { getClientList, getClientStatus } from '../services/command';
 import { Card, Text, Spinner, Divider, Badge } from '@fluentui/react-components';
 import { formatTimestamp } from '../utils';
 import { ClientList, ClientStatusList } from '../types';
+
 function Overview() {
     const [clientCount, setClientCount] = useState<number>(0);
     const [onlineClientCount, setOnlineClientCount] = useState<number>(0);
@@ -35,7 +36,7 @@ function Overview() {
         <div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 16 }}>
                 <Card style={{ maxWidth: 350 }}>
-                    <div> {/* 直接使用 div, 不再使用 Card.Section */}
+                    <div>
                         <Text size={600}>已注册客户端数量</Text>
                         {loading ? <Spinner /> : <Text size={800}>{clientCount}</Text>}
                     </div>
@@ -53,24 +54,31 @@ function Overview() {
             {loading ? (<Spinner />) : (
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
                     {
-                        Object.keys(clientList).map((uid) => (
-                            <Card key={uid} style={{ maxWidth: 350 }} className='card'>
-                                <div>
-                                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                                        <div style={{ flexGrow: 1 }}>
-                                            <Text block size={600}>{clientList[uid]}({uid})</Text>
+                        Object.keys(clientList).map((uid) => {
+                            const clientStatus = clientStatusList[uid]; // 获取客户端状态，可能为 undefined
+                            return (
+                                <Card key={uid} style={{ maxWidth: 350 }} className='card'>
+                                    <div>
+                                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                                            <div style={{ flexGrow: 1 }}>
+                                                <Text block size={600}>{clientList[uid]}({uid})</Text>
+                                            </div>
+                                            {clientStatus ? ( // 检查 clientStatus 是否存在
+                                                clientStatus.isOnline ? (
+                                                    <Badge color='success'>在线</Badge>
+                                                ) : (
+                                                    <Badge color='danger'>离线</Badge>
+                                                )
+                                            ) : (
+                                                <Badge color='warning'>状态未知</Badge> // 或者其他你希望的默认状态
+                                            )}
                                         </div>
-                                        {clientStatusList[uid].isOnline ? (
-                                            <Badge>在线</Badge>
-                                        ) : (
-                                            <Badge>离线</Badge>
-                                        )}
-                                    </div>
 
-                                    <Text>最后心跳时间：{formatTimestamp(clientStatusList[uid].lastHeartbeat)}</Text>
-                                </div>
-                            </Card>
-                        ))
+                                        <Text>最后心跳时间：{clientStatus ? formatTimestamp(clientStatus.lastHeartbeat) : 'N/A'}</Text>
+                                    </div>
+                                </Card>
+                            )
+                        })
                     }
                 </div>
             )}
