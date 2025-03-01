@@ -83,7 +83,7 @@ async def get_policy(name: str):
     :return: 拉取的策略
     """
     try:
-        return Datas.Policies.read_file(name)
+        return Datas.Policies.read(name)
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail="Policy file not found.")
 
@@ -92,7 +92,7 @@ async def get_policy(name: str):
 async def get_class_plan(name: str):
     """获取课表"""
     try:
-        return Datas.ClassPlans.read_file(name)
+        return Datas.ClassPlans.read(name)
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail="Class plan file not found.")
 
@@ -101,7 +101,7 @@ async def get_class_plan(name: str):
 async def get_subjects(name: str):
     """获取科目列表"""
     try:
-        return Datas.SubjectsSource.read_file(name)
+        return Datas.SubjectsSource.read(name)
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail="Subject source file not found.")
 
@@ -109,7 +109,7 @@ async def get_subjects(name: str):
 async def get_time_layout(name: str):
     """获取时间表"""
     try:
-        return Datas.TimeLayouts.read_file(name)
+        return Datas.TimeLayouts.read(name)
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail="Time layout file not found.")
 
@@ -118,7 +118,7 @@ async def get_time_layout(name: str):
 async def get_settings(name: str):
     """获取设置"""
     try:
-        return Datas.DefaultSettings.read_file(name)
+        return Datas.DefaultSettings.read(name)
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail="Settings file not found.")
 
@@ -160,15 +160,15 @@ async def save_resource_file_content(resource_type: str, file_name: str, content
     try:
         match resource_type:
             case "ClassPlans":
-                return Datas.ClassPlans.write_file(file_name, content)
+                return Datas.ClassPlans.write(file_name, content)
             case "DefaultSettings":
-                return Datas.DefaultSettings.write_file(file_name, content)
+                return Datas.DefaultSettings.write(file_name, content)
             case "Policies":
-                return Datas.Policies.write_file(file_name, content)
+                return Datas.Policies.write(file_name, content)
             case "SubjectsSource":
-                return Datas.SubjectsSource.write_file(file_name, content)
+                return Datas.SubjectsSource.write(file_name, content)
             case "TimeLayouts":
-                return Datas.TimeLayouts.write_file(file_name, content)
+                return Datas.TimeLayouts.write(file_name, content)
             case _:
                 raise HTTPException(status_code=404, detail="Resource type invalid.")
     except FileNotFoundError as e:

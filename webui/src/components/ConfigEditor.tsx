@@ -1,71 +1,86 @@
-import React, { useState, useEffect } from 'react';
-import { Dialog,  DialogSurface, DialogTitle, DialogBody, Textarea, Button,  } from '@fluentui/react-components';
-import { saveConfigFile, getConfigFile } from '../services/api';
+import React, { useState, useEffect, useRef } from 'react';
+import { TextField, Button, Box } from '@mui/material';
+import { styled } from '@mui/material/styles';
 
 interface ConfigEditorProps {
-    resourceType: string;
-    name: string;
-    content?:string;
-    onClose: () => void;
+  value: string;
+  onChange: (newValue: string) => void;
+  onSave: (content: string) => Promise<void>;
+  isEditing: boolean;
+  setIsEditing: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const ConfigEditor: React.FC<ConfigEditorProps> = ({ resourceType, name, onClose, content }) => {
-  const [configContent, setConfigContent] = useState(content || '');
-    const [loading, setLoading] = useState(false)
+const StyledTextField = styled(TextField)({
+  '& .MuiOutlinedInput-root': {
+    '& textarea': {
+      fontFamily: 'monospace', // 使用等宽字体
+    },
+  },
+});
 
-    useEffect(()=>{
-        const fetchData = async ()=>{
-            if(content === ""){
-                try{
-                    const realUrl = `/api/v1/client/${resourceType.toLowerCase()}?name=${name}`
-                    const res = await getConfigFile(realUrl)
-                    setConfigContent(res)
-                    setLoading(false)
-                }catch(err){
-                    console.error("获取配置失败",err)
-                    alert("获取配置失败")
-                    onClose()
-                }
-            }
-        }
-        if (name !== "new"){
-            setLoading(true)
-            fetchData()
-        }
-    },[])
+const ConfigEditor: React.FC<ConfigEditorProps> = ({ value, onChange, onSave, isEditing, setIsEditing }) => {
+  const [localValue, setLocalValue] = useState(value);
+  const editorRef = useRef<HTMLTextAreaElement>(null);
 
-  const handleSave = async () => {
+  useEffect(() => {
+    setLocalValue(value);
+  }, [value]);
+
+  const handleLocalChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setLocalValue(event.target.value);
+  };
+
+  const handleEditClick = () => {
+    setIsEditing(true);
+  };
+
+  const handleSaveClick = async () => {
     try {
-      await saveConfigFile(resourceType, name, configContent);
-      alert('保存成功');
-      onClose();
+      await onSave(localValue);
+      setIsEditing(false);
     } catch (error) {
-      console.error('保存失败:', error);
-      alert('保存失败');
+      // 错误处理已经在父组件中通过 Snackbar 完成
     }
   };
-    if(loading){
-        return <div>加载中...</div>
-    }
+
+  const handleCancelEdit = () => {
+    setLocalValue(value); // 恢复到原始值
+    setIsEditing(false);
+  };
+
 
   return (
-        <Dialog modalType={undefined}>
-            <DialogSurface style={{width:'80%',maxWidth:800}}>
-                <DialogTitle>{resourceType} - {name}</DialogTitle>
-                <DialogBody>
-                    <div style={{display:'flex', flexDirection:'column', gap:8}}>
-                        <Textarea
-                            value={configContent}
-                            onChange={(e) => setConfigContent(e.target.value)}
-                            style={{height:300}}
-                        />
-                         <div style={{display:'flex', gap:8}}>
-                            <Button appearance='primary' onClick={handleSave}>保存</Button>
-                            <Button appearance='secondary' onClick={onClose}>取消</Button>
-                        </div>
-                    </div>
-                </DialogBody>
-            </DialogSurface>
-        </Dialog>
+    <Box>
+      <StyledTextField
+        fullWidth
+        multiline
+        rows={20}
+        variant="outlined"
+        value={localValue}
+        onChange={handleLocalChange}
+        inputRef={editorRef}
+        InputProps={{
+          readOnly: !isEditing,
+        }}
+      />
+      <Box mt={2} textAlign="right">
+        {!isEditing ? (
+          <Button variant="contained" color="primary" onClick={handleEditClick}>
+            编辑
+          </Button>
+        ) : (
+          <>
+            <Button variant="contained" color="primary" onClick={handleSaveClick} sx={{ mr: 1 }}>
+              保存
+            </Button>
+            <Button variant="outlined" onClick={handleCancelEdit}>
+              取消
+            </Button>
+          </>
+        )}
+      </Box>
+    </Box>
   );
 };
+
+export default ConfigEditor;

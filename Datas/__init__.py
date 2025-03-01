@@ -12,7 +12,7 @@ class Resources:
         self.file_list = [f[:-5] for f in os.listdir(f"Datas/{self.path}")]
         return self.file_list
 
-    def read_file(self, name: str) -> dict:
+    def read(self, name: str) -> dict:
         self.refresh()
         if name not in self.file_list:
             for n in self.file_list:
@@ -23,7 +23,7 @@ class Resources:
             with open(f"Datas/{self.path}/{name}.json", encoding="utf-8") as f:
                 return json.load(f)
 
-    def write_file(self, name: str, data: dict) -> None:
+    def write(self, name: str, data: dict) -> None:
         self.refresh()
         if name not in self.file_list:
             raise FileNotFoundError(f"{self.name} {name} not found.")

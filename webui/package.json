@@ -1,32 +1,29 @@
 {
   "name": "webui",
-  "version": "1.0.0",
-  "description": "ClassIsland Central Control Server WebUI",
-  "main": "index.js",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "start": "webpack serve --mode development",
-    "build": "webpack --mode production"
+    "dev": "vite --port 50053",
+    "build": "tsc && vite build",
+    "preview": "vite preview --port 50053"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
-    "@fluentui/react-components": "^9.60.0",
-    "@fluentui/react-icons": "^2.0.274",
-    "@fluentui/react-tabs": "^9.7.0",
-    "@types/react-router-dom": "^5.3.3",
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^5.15.10",
+    "@mui/material": "^5.15.10",
+    "@mui/x-data-grid": "^6.19.4",
+    "axios": "^1.6.7",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^7.2.0"
+    "react-router-dom": "^6.22.0"
   },
   "devDependencies": {
-    "css-loader": "^6.10.0",
-    "html-webpack-plugin": "^5.6.3",
-    "style-loader": "^3.3.4",
-    "ts-loader": "^9.5.1",
-    "typescript": "^5.4.2",
-    "webpack": "^5.90.3",
-    "webpack-cli": "^5.1.4",
-    "webpack-dev-server": "^5.0.2"
+    "@types/react": "^18.2.55",
+    "@types/react-dom": "^18.2.19",
+    "@vitejs/plugin-react": "^4.2.1",
+    "typescript": "^5.2.2",
+    "vite": "^5.1.0"
   }
 }
