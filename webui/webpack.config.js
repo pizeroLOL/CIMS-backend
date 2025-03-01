@@ -39,16 +39,16 @@ module.exports = {
           directory: path.join(__dirname, 'dist'),
         },
         port: 50053,
-        proxy: [ // 修改这里，将 proxy 选项的值改为数组
+        proxy: [
             {
-                '/api': {
-                    target: 'http://localhost:50050',
-                    changeOrigin: true,
-                },
-                '/command': {
-                    target: 'http://localhost:50052',
-                    changeOrigin: true,
-                },
+                context: '/api', // 指定代理的上下文路径，以 /api 开头的请求会被代理
+                target: 'http://localhost:50050', // 目标服务器地址
+                changeOrigin: true, // 改变请求头中的 Origin 字段，通常设置为 true
+            },
+            {
+                context: '/command', // 指定代理的上下文路径，以 /command 开头的请求会被代理
+                target: 'http://localhost:50052', // 目标服务器地址
+                changeOrigin: true, // 改变请求头中的 Origin 字段，通常设置为 true
             }
         ],
         historyApiFallback: true,
