@@ -52,14 +52,14 @@ const Overview: React.FC = () => {
           <CircularProgress />
         </div>
       ) : (
-        <Grid container spacing={3}>
-          <Grid item xs={12} sm={6} md={4}>
+        <Grid container spacing={3}> {/* 使用 Grid 容器 */}
+          <Grid item xs={12} sm={6} md={4} lg={3}> {/* 响应式 Grid Item */}
             <Paper elevation={3} style={{ padding: '20px', textAlign: 'center' }}>
               <Typography variant="h6">总客户端数量</Typography>
               <Typography variant="h3">{totalClients}</Typography>
             </Paper>
           </Grid>
-          <Grid item xs={12} sm={6} md={4}>
+          <Grid item xs={12} sm={6} md={4} lg={3}> {/* 响应式 Grid Item */}
             <Paper elevation={3} style={{ padding: '20px', textAlign: 'center' }}>
               <Typography variant="h6">在线客户端数量</Typography>
               <Typography variant="h3">{onlineClients}</Typography>

@@ -21,5 +21,7 @@
 >
 > ***当前配置文件对接方式发生变更，相关的管理晚些时候上线***
 
+## WebUI
+
 ## Star 历史
 [![Stargazers over time](https://starchart.cc/kaokao221/ClassIslandManagementServer.py.svg?variant=adaptive)](https://starchart.cc/kaokao221/ClassIslandManagementServer.py)
