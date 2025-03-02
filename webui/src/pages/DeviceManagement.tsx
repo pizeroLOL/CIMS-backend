@@ -43,7 +43,7 @@ const DeviceManagement: React.FC = () => {
     const [overlayIconRight, setOverlayIconRight] = useState<number>(0);
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
-    const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
+    const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error' | 'warning'>('success'); // 添加 'warning' 类型
     const theme = useTheme();
     const isSmDown = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -58,7 +58,8 @@ const DeviceManagement: React.FC = () => {
             setClientStatus(statusData);
 
             const clientList: ClientInfo[] = Object.entries(clientsData).map(([uid, id]) => {
-                const displayName = id || `${uid.substring(0, 4)}...${uid.substring(uid.length - 2)}`;
+                // Explicitly cast displayName to string using 'as string'
+                const displayName = (id ? id : `${uid.substring(0, 4)}...${uid.substring(uid.length - 2)}`) as string;
                 return {
                     uid,
                     id: id as string,

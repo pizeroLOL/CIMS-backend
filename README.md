@@ -23,5 +23,19 @@
 
 ## WebUI
 
+请先 `cd webui`，在执行下面的命令之前
+
+运行 `npm install` 安装依赖
+
+运行 `nmp run build` 构建生产环境的服务器
+
+当前 WebUI 已经实现：
+- [x] **概览页面**用于快速展示服务器已经注册的设备数量和在线的设备数量
+- [x] **设备管理**用于向设备执行重启、推送消息和更新数据(更新数据客户端当前不支持，最早将在 1.7 版本上线)
+- [ ] **配置文件管理**目前只实现基础的查看能力
+- [ ] **设置**空的（
+
+## ~~罢工了~~
+
 ## Star 历史
 [![Stargazers over time](https://starchart.cc/kaokao221/ClassIslandManagementServer.py.svg?variant=adaptive)](https://starchart.cc/kaokao221/ClassIslandManagementServer.py)

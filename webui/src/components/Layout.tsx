@@ -16,11 +16,10 @@ import DevicesIcon from '@mui/icons-material/Devices';
 import SettingsIcon from '@mui/icons-material/Settings';
 import ImageIcon from '@mui/icons-material/Image';
 import { Link, useLocation } from 'react-router-dom';
-import logoUrl from '../assets/logo.png?url';
 import { Description as DescriptionIcon } from '@mui/icons-material';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { CSSProperties } from 'react';
-import MuiAppBar from '@mui/material/AppBar'; // 导入 MuiAppBar，并更名为 AppBar，避免混淆
+import MuiAppBar from '@mui/material/AppBar';
 
 const drawerWidth = 240;
 
@@ -54,11 +53,17 @@ const DrawerHeader = styled('div')(({ theme }) => ({
     ...theme.mixins.toolbar,
 }));
 
-// const AppBar = styled(Toolbar)(({ theme }) => ({ // 删除 styled(Toolbar) 的 AppBar 定义
-//     zIndex: theme.zIndex.drawer + 1,
-// }));
 
-const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(
+const AppBar = styled(MuiAppBar, {
+  shouldForwardProp: (prop) => prop !== 'open'
+})<{ open?: boolean }>(({ theme, open }) => ({ // Define props directly in styled call
+    zIndex: theme.zIndex.drawer + 1,
+    width: `calc(100% - ${open ? drawerWidth : `calc(${theme.spacing(9)} + 1px)`})`,
+    marginLeft: `${open ? drawerWidth : `calc(${theme.spacing(9)} + 1px)`}`,
+}));
+
+
+const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })<{ open?: boolean }>( // Define props directly in styled call
     ({ theme, open }) => ({
         width: drawerWidth,
         flexShrink: 0,
@@ -74,7 +79,7 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 );
 
 
-const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
+const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })<{ open?: boolean }>( // Define props directly in styled call
     ({ theme, open }) => ({
         flexGrow: 1,
         padding: theme.spacing(3),
@@ -90,7 +95,7 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
             }),
             marginLeft: 0,
         }),
-        marginTop: '0px', // 移除 marginTop: '64px'
+        marginTop: '0px',
     }),
 );
 
@@ -111,8 +116,8 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
 
 
     const version = {
-        server: '0.1.0',
-        webui: '0.1.0',
+        server: '0.1.1.34(build 19)',
+        webui: '0.3.1.5(build 77)',
     };
 
     const menuItems = [
@@ -123,24 +128,20 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
     ];
 
 
+    const logoUrl = new URL('../assets/logo.png', import.meta.url).href;
+
+
     return (
         <Box sx={{ display: 'flex' }}>
             <CssBaseline />
-            {/* 删除整个 MuiAppBar 组件 */}
-            {/* <MuiAppBar position="fixed" sx={{
-                width: `calc(100% - ${open ? drawerWidth : `calc(${theme.spacing(9)} + 1px)`})`,
-                ml: `${open ? drawerWidth : `calc(${theme.spacing(9)} + 1px)`}`,
-                zIndex: theme.zIndex.drawer + 1,
-                backgroundColor: 'white',
-                color: 'inherit',
-            }}>
+            <AppBar position="fixed" open={open} > {/* Pass 'open' prop here */}
                 <Toolbar>
-                     Removed the Typography component with the title from here
+                    {/* Removed the Typography component with the title from here */}
                 </Toolbar>
-            </MuiAppBar> */}
-            <Drawer variant="permanent" open={open} PaperProps={{ sx: { position: 'relative' } }}>
+            </AppBar>
+            <Drawer variant="permanent" open={open} PaperProps={{ sx: { position: 'relative' } }}> {/* Pass 'open' prop here */}
                 <Toolbar />
-                <DrawerHeader sx={{ flexDirection: 'column', alignItems: 'flex-start', padding: 2, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <DrawerHeader sx={{ flexDirection: 'column', alignItems: 'flex-start', padding: 2, display: 'flex', justifyContent: 'center' }}>
                     <Box component="img" src={logoUrl} alt="Logo" sx={{ height: 50, mb: 1 }} />
                     <Typography variant="h6" noWrap component="div" sx={{ fontWeight: 'bold', textAlign: 'center' }}>
                         ClassIsland
@@ -179,11 +180,15 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </List>
                 <Divider />
                 <Box sx={{ mt: 'auto', p: 2, textAlign: 'center', fontSize: '0.8rem', color: 'text.secondary', opacity: open ? 1 : 0 }}>
-                    <Typography variant="caption">服务器版本: {version.server}</Typography>
-                    <Typography variant="caption">WebUI 版本: {version.webui}</Typography>
+                    <Box sx={{ display: 'block' }}> {/* 使用 Box 包裹服务器版本，并设置 display: 'block' */}
+                        <Typography variant="caption">服务器版本: {version.server}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'block' }}> {/* 使用 Box 包裹 WebUI 版本，并设置 display: 'block' */}
+                        <Typography variant="caption">WebUI 版本: {version.webui}</Typography>
+                    </Box>
                 </Box>
             </Drawer>
-            <Main sx={{ mt: '0px' }}> {/* 修改 marginTop 为 '0px' */}
+            <Main open={open}> {/* Pass 'open' prop here */}
                 <DrawerHeader />
                 {children}
             </Main>
