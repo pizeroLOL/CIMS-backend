@@ -189,7 +189,7 @@ async def save_resource_file_content(resource_type: str, file_name: str, content
 
 
 
-async def start(port, host):
+async def start(port=50050, host="0.0.0.0"):
     """启动 FastAPI 应用"""
     parser = argparse.ArgumentParser(description="启动管理服务器")
     parser.add_argument("--port", type=int, default=port, help="服务器端口号")

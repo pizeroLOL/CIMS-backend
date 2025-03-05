@@ -20,7 +20,7 @@ def load_settings(settings_file="settings.json"):
                 "webui": 50053,
             },
             "organization_name": "CMS2.py 本地测试",
-            "host": "0.0.0.0"
+            "host": "localhost"
         }
         with open(settings_file, "w") as s:
             json.dump(settings, s, indent=4)
@@ -32,7 +32,7 @@ async def start_servers(settings):
     await asyncio.gather(
         ManagementServer.gRPC.start(settings["ports"]["gRPC"]),
         ManagementServer.command.start(settings["ports"]["command"]),
-        ManagementServer.api.start(settings["ports"]["api"], settings["host"])
+        ManagementServer.api.start(settings["ports"]["api"])
     )
 
 
