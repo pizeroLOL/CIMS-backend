@@ -47,6 +47,8 @@ async def main():
     parser.add_argument("-H", "--host", type=str, help="Override host address from settings.")
     parser.add_argument("-l", "--list-ports", action="store_true",
                         help="List the current configuration ports then exit.")
+    parser.add_argument("-p", "--generate-management-preset", action="store_true",
+                        help="Generate ManagementPreset.json")
 
     args = parser.parse_args()
 
@@ -59,6 +61,15 @@ async def main():
         print(f"  API:     {settings['ports']['api']}")
         print(f"  WebUI:   {settings['ports']['webui']}")
         print(f"  Host:    {settings['host']}")
+        sys.exit(0)
+
+    if args.generate_management_preset:
+        with open("ManagementPreset.json", "w") as mp:
+            json.dump({
+                "ManagementServerKind": 1,
+                "ManagementServer": f"http://{settings["host"]}:{settings["ports"]["api"]}",
+                "ManagementServerGrpc": f"http://{settings["host"]}:{settings["ports"]["gRPC"]}",
+            }, mp)
         sys.exit(0)
 
     # Override ports if provided as arguments
