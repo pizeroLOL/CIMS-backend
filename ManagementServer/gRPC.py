@@ -189,12 +189,12 @@ class ClientRegisterServicer(ClientRegister_pb2_grpc.ClientRegisterServicer):
         return ClientRegisterScRsp_pb2.ClientRegisterScRsp(Retcode=Retcode_pb2.ServerInternalError,
                                                            Message="Not implemented")
 
-async def start(port=50051):
+async def start(port=50051, host="0.0.0.0"):
     """启动gRPC服务器 (保持不变)"""
     server = grpc.aio.server()
     ClientRegister_pb2_grpc.add_ClientRegisterServicer_to_server(ClientRegisterServicer(), server)
     ClientCommandDeliver_pb2_grpc.add_ClientCommandDeliverServicer_to_server(ClientCommandDeliverServicer(), server)
-    listen_addr = f'0.0.0.0:{port}'
+    listen_addr = f'{host}:{port}'
     server.add_insecure_port(listen_addr)
     print(f"Starting gRPC server on {listen_addr}")
     await server.start()

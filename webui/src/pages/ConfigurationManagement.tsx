@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     Typography,
     Paper,
@@ -15,7 +15,10 @@ import {
     FormControlLabel,
     Switch,
     FormGroup,
-    FormControl
+    FormControl,
+    Dialog,
+    DialogTitle,
+    DialogContent, TextField, DialogActions
 } from '@mui/material';
 import { apiClient } from '../services/api';
 import ConfigEditor from '../components/ConfigEditor';
@@ -61,6 +64,10 @@ const ConfigurationManagement: React.FC = () => {
     const isSmDown = useMediaQuery(theme.breakpoints.down('sm'));
 
     const [policyConfig, setPolicyConfig] = useState<PolicyConfig | null>(null);
+
+    const [openAddDialog, setOpenAddDialog] = useState(false);
+    const [newConfigName, setNewConfigName] = useState('');
+    const newConfigNameRef = useRef<HTMLInputElement>(null);
 
     const currentResourceType = resourceTypes[tabValue].key;
 
@@ -172,8 +179,37 @@ const ConfigurationManagement: React.FC = () => {
         setSnackbarOpen(false);
     };
 
-    const handleAddConfig = () => {
-        alert('新增配置功能待实现');
+    const handleOpenAddDialog = () => {
+        setOpenAddDialog(true);
+        setNewConfigName('');
+        setTimeout(() => {
+            if (newConfigNameRef.current) {
+                newConfigNameRef.current.focus();
+            }
+        }, 0);
+    };
+
+    const handleCloseAddDialog = () => {
+        setOpenAddDialog(false);
+    };
+
+    const handleAddConfig = async () => {
+        if (!newConfigName.trim()) {
+            handleSnackbarOpen('配置文件名不能为空', 'error');
+            return;
+        }
+        setLoading(true);
+        try {
+            await apiClient.get(`/api/v1/panel/new/${currentResourceType}?name=${newConfigName}`);
+            handleSnackbarOpen('新增配置文件成功', 'success');
+            fetchConfigNames(currentResourceType);
+            handleCloseAddDialog();
+        } catch (error) {
+            console.error("Failed to add config:", error);
+            handleSnackbarOpen('新增配置文件失败', 'error');
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleDeleteConfig = () => {
@@ -193,122 +229,149 @@ const ConfigurationManagement: React.FC = () => {
     const isPolicyTab = currentResourceType === "Policies" && policyConfig !== null;
 
     return (
-        <div>
-            <Typography variant="h4" gutterBottom>
-                配置管理
-            </Typography>
+        <>
+            <div>
+                <Typography variant="h4" gutterBottom>
+                    配置管理
+                </Typography>
 
-            <Tabs value={tabValue} onChange={handleTabChange} aria-label="resource types tabs">
-                {resourceTypes.map((type, index) => (
-                    <Tab key={type.key} label={type.label} />
-                ))}
-            </Tabs>
+                <Tabs value={tabValue} onChange={handleTabChange} aria-label="resource types tabs">
+                    {resourceTypes.map((type, index) => (
+                        <Tab key={type.key} label={type.label}/>
+                    ))}
+                </Tabs>
 
-            <Paper elevation={2} style={{ marginTop: 20, padding: 20 }}>
-                <Grid container spacing={isSmDown ? 0 : 2} direction={isSmDown ? "column" : "row"}>
-                    <Grid item xs={12} sm={isSmDown ? 12 : 4} md={3}>
-                        <Typography variant="h6" gutterBottom>配置文件列表</Typography>
-                        {loading && tabValue === tabValue ? (
-                            <div style={{ display: 'flex', justifyContent: 'center', margin: '20px 0' }}>
-                                <CircularProgress size={24} />
-                            </div>
-                        ) : (
-                            <ListGroup>
-                                {configNames.map((name) => (
-                                    <ListItem
-                                        key={name}
-                                        selected={selectedConfigName === name}
-                                        onClick={() => handleConfigNameClick(name)}
-                                    >
-                                        {name}
-                                    </ListItem>
-                                ))}
-                            </ListGroup>
-                        )}
-                        <Box mt={2}>
-                            <Button variant="contained" color="primary" onClick={handleAddConfig} sx={{ mr: 1 }}>
-                                新增
-                            </Button>
-                            <Button variant="outlined" color="error" onClick={handleDeleteConfig} disabled={!selectedConfigName}>
-                                删除
-                            </Button>
-                        </Box>
-                    </Grid>
-
-                    <Grid item xs={12} sm={isSmDown ? 12 : 8} md={9}>
-                        <Typography variant="h6" gutterBottom>配置文件内容</Typography>
-                        {loading && selectedConfigName ? (
-                            <div style={{ display: 'flex', justifyContent: 'center', margin: '20px 0' }}>
-                                <CircularProgress size={24} />
-                            </div>
-                        ) : (
-                            <>
-                            {isPolicyTab? (
-                                <FormControl component="fieldset">
-                                    <FormGroup>
-                                        <FormControlLabel
-                                            control={<Switch checked={policyConfig.DisableProfileClassPlanEditing} onChange={(e) => handlePolicyConfigChange('DisableProfileClassPlanEditing', e.target.checked)} />}
-                                            label="禁用课表编辑"
-                                        />
-                                        <FormControlLabel
-                                            control={<Switch checked={policyConfig.DisableProfileTimeLayoutEditing} onChange={(e) => handlePolicyConfigChange('DisableProfileTimeLayoutEditing', e.target.checked)} />}
-                                            label="禁用时间布局编辑"
-                                        />
-                                        <FormControlLabel
-                                            control={<Switch checked={policyConfig.DisableProfileSubjectsEditing} onChange={(e) => handlePolicyConfigChange('DisableProfileSubjectsEditing', e.target.checked)} />}
-                                            label="禁用科目编辑"
-                                        />
-                                        <FormControlLabel
-                                            control={<Switch checked={policyConfig.DisableProfileEditing} onChange={(e) => handlePolicyConfigChange('DisableProfileEditing', e.target.checked)} />}
-                                            label="禁用客户端配置编辑"
-                                        />
-                                        <FormControlLabel
-                                            control={<Switch checked={policyConfig.DisableSettingsEditing} onChange={(e) => handlePolicyConfigChange('DisableSettingsEditing', e.target.checked)} />}
-                                            label="禁用客户端设置编辑"
-                                        />
-                                        <FormControlLabel
-                                            control={<Switch checked={policyConfig.DisableSplashCustomize} onChange={(e) => handlePolicyConfigChange('DisableSplashCustomize', e.target.checked)} />}
-                                            label="禁用客户端启动画面自定义"
-                                        />
-                                        <FormControlLabel
-                                            control={<Switch checked={policyConfig.DisableDebugMenu} onChange={(e) => handlePolicyConfigChange('DisableDebugMenu', e.target.checked)} />}
-                                            label="禁用客户端调试菜单"
-                                        />
-                                        <FormControlLabel
-                                            control={<Switch checked={policyConfig.AllowExitManagement} onChange={(e) => handlePolicyConfigChange('AllowExitManagement', e.target.checked)} />}
-                                            label="允许客户端退出管理"
-                                        />
-                                    </FormGroup>
-                                    <Button variant="contained" color="primary" onClick={handleSavePolicyConfig} disabled={loading}>
-                                            保存
-                                    </Button>
-                                </FormControl>
+                <Paper elevation={2} style={{marginTop: 20, padding: 20}}>
+                    <Grid container spacing={isSmDown ? 0 : 2} direction={isSmDown ? "column" : "row"}>
+                        <Grid item xs={12} sm={isSmDown ? 12 : 4} md={3}>
+                            <Typography variant="h6" gutterBottom>配置文件列表</Typography>
+                            {loading && tabValue === tabValue ? (
+                                <div style={{display: 'flex', justifyContent: 'center', margin: '20px 0'}}>
+                                    <CircularProgress size={24}/>
+                                </div>
                             ) : (
-                                <ConfigEditor
-                                    value={configContent}
-                                    onChange={setConfigContent}
-                                    onSave={handleSaveConfig}
-                                    isEditing={isEditing}
-                                    setIsEditing={setIsEditing}
-                                />
+                                <ListGroup>
+                                    {configNames.map((name) => (
+                                        <ListItem
+                                            key={name}
+                                            selected={selectedConfigName === name}
+                                            onClick={() => handleConfigNameClick(name)}
+                                        >
+                                            {name}
+                                        </ListItem>
+                                    ))}
+                                </ListGroup>
                             )}
-                            </>
-                        )}
-                    </Grid>
-                </Grid>
-            </Paper>
+                            <Box mt={2}>
+                                <Button variant="contained" color="primary" onClick={handleOpenAddDialog} sx={{mr: 1}}>
+                                    新增
+                                </Button>
+                                <Button variant="outlined" color="error" onClick={handleDeleteConfig}
+                                        disabled={!selectedConfigName}>
+                                    删除
+                                </Button>
+                            </Box>
+                        </Grid>
 
-            <Snackbar
-                open={snackbarOpen}
-                autoHideDuration={3000}
-                onClose={handleSnackbarClose}
-                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-            >
-                <Alert onClose={handleSnackbarClose} severity={snackbarSeverity} sx={{ width: '100%' }}>
-                    {snackbarMessage}
-                </Alert>
-            </Snackbar>
-        </div>
+                        <Grid item xs={12} sm={isSmDown ? 12 : 8} md={9}>
+                            <Typography variant="h6" gutterBottom>配置文件内容</Typography>
+                            {loading && selectedConfigName ? (
+                                <div style={{display: 'flex', justifyContent: 'center', margin: '20px 0'}}>
+                                    <CircularProgress size={24}/>
+                                </div>
+                            ) : (
+                                <>
+                                    {isPolicyTab ? (
+                                        <FormControl component="fieldset">
+                                            <FormGroup>
+                                                <FormControlLabel
+                                                    control={<Switch
+                                                        checked={policyConfig.DisableProfileClassPlanEditing}
+                                                        onChange={(e) => handlePolicyConfigChange('DisableProfileClassPlanEditing', e.target.checked)}/>}
+                                                    label="禁用课表编辑"/>
+                                                <FormControlLabel
+                                                    control={<Switch
+                                                        checked={policyConfig.DisableProfileTimeLayoutEditing}
+                                                        onChange={(e) => handlePolicyConfigChange('DisableProfileTimeLayoutEditing', e.target.checked)}/>}
+                                                    label="禁用时间布局编辑"/>
+                                                <FormControlLabel
+                                                    control={<Switch
+                                                        checked={policyConfig.DisableProfileSubjectsEditing}
+                                                        onChange={(e) => handlePolicyConfigChange('DisableProfileSubjectsEditing', e.target.checked)}/>}
+                                                    label="禁用科目编辑"/>
+                                                <FormControlLabel
+                                                    control={<Switch checked={policyConfig.DisableProfileEditing}
+                                                                     onChange={(e) => handlePolicyConfigChange('DisableProfileEditing', e.target.checked)}/>}
+                                                    label="禁用客户端配置编辑"/>
+                                                <FormControlLabel
+                                                    control={<Switch checked={policyConfig.DisableSettingsEditing}
+                                                                     onChange={(e) => handlePolicyConfigChange('DisableSettingsEditing', e.target.checked)}/>}
+                                                    label="禁用客户端设置编辑"/>
+                                                <FormControlLabel
+                                                    control={<Switch checked={policyConfig.DisableSplashCustomize}
+                                                                     onChange={(e) => handlePolicyConfigChange('DisableSplashCustomize', e.target.checked)}/>}
+                                                    label="禁用客户端启动画面自定义"/>
+                                                <FormControlLabel
+                                                    control={<Switch checked={policyConfig.DisableDebugMenu}
+                                                                     onChange={(e) => handlePolicyConfigChange('DisableDebugMenu', e.target.checked)}/>}
+                                                    label="禁用客户端调试菜单"/>
+                                                <FormControlLabel
+                                                    control={<Switch checked={policyConfig.AllowExitManagement}
+                                                                     onChange={(e) => handlePolicyConfigChange('AllowExitManagement', e.target.checked)}/>}
+                                                    label="允许客户端退出管理"/>
+                                            </FormGroup>
+                                            <Button variant="contained" color="primary" onClick={handleSavePolicyConfig}
+                                                    disabled={loading}>
+                                                保存
+                                            </Button>
+                                        </FormControl>
+                                    ) : (
+                                        <ConfigEditor
+                                            value={configContent}
+                                            onChange={setConfigContent}
+                                            onSave={handleSaveConfig}
+                                            isEditing={isEditing}
+                                            setIsEditing={setIsEditing}/>
+                                    )}
+                                </>
+                            )}
+                        </Grid>
+                    </Grid>
+                </Paper>
+
+                <Snackbar
+                    open={snackbarOpen}
+                    autoHideDuration={3000}
+                    onClose={handleSnackbarClose}
+                    anchorOrigin={{vertical: 'top', horizontal: 'right'}}
+                >
+                    <Alert onClose={handleSnackbarClose} severity={snackbarSeverity} sx={{width: '100%'}}>
+                        {snackbarMessage}
+                    </Alert>
+                </Snackbar>
+            </div>
+            <Dialog open={openAddDialog} onClose={handleCloseAddDialog}>
+                <DialogTitle>新增配置文件</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        id="name"
+                        label="配置文件名"
+                        type="text"
+                        fullWidth
+                        variant="standard"
+                        value={newConfigName}
+                        onChange={(e) => setNewConfigName(e.target.value)}
+                        inputRef={newConfigNameRef}/>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseAddDialog}>取消</Button>
+                    <Button onClick={handleAddConfig} disabled={loading}>
+                        确定
+                    </Button>
+                </DialogActions>
+            </Dialog></>
     );
 };
 

@@ -32,7 +32,7 @@ async def start_servers(settings):
     await asyncio.gather(
         ManagementServer.gRPC.start(settings["ports"]["gRPC"]),
         ManagementServer.command.start(settings["ports"]["command"]),
-        ManagementServer.api.start(settings["ports"]["api"])
+        ManagementServer.api.start(settings["ports"]["api"], settings["host"])
     )
 
 
