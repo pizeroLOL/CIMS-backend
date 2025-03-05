@@ -17,7 +17,7 @@ api = FastAPI(
 
 @api.get("/favicon.ico")
 async def favicon():
-    return FileResponse("./webui/public/favicon.ico")
+    return 0 # FileResponse("./webui/public/favicon.ico")
 
 
 # region 客户端配置相关 API (修改)
@@ -41,18 +41,18 @@ def _load_settings(settings_file="settings.json"):
 async def get_client_manifest(uid: str=None, version: int=int(time.time()), settings_file: str = "settings.json"):
     settings = _load_settings(settings_file)
     organization_name = settings.get("OrganizationName", "CMS2.py 本地测试")
-    host = settings.get("Host", "127.0.0.1:50050")
+    host = settings.get("host", "127.0.0.1")
 
     """获取指定客户端的配置清单"""
     profile_config = Datas.ProfileConfig.profile_config
     base_url = "/api/v1/client/"
     config = profile_config.get(uid, {"ClassPlan": "default", "TimeLayout": "default", "Subjects": "default", "Settings": "default", "Policy": "default"})
     return {
-        "ClassPlanSource": _get_manifest_entry(f"{base_url}ClassPlan", config["ClassPlan"], version, host),
-        "TimeLayoutSource": _get_manifest_entry(f"{base_url}TimeLayout", config["TimeLayout"], version, host),
-        "SubjectsSource": _get_manifest_entry(f"{base_url}Subjects", config["Subjects"], version, host),
+        "ClassPlanSource": _get_manifest_entry(f"{base_url}ClassPlans", config["ClassPlan"], version, host),
+        "TimeLayoutSource": _get_manifest_entry(f"{base_url}TimeLayouts", config["TimeLayout"], version, host),
+        "SubjectsSource": _get_manifest_entry(f"{base_url}SubjectsSource", config["Subjects"], version, host),
         "DefaultSettingsSource": _get_manifest_entry(f"{base_url}Settings", config["Settings"], version, host),
-        "PolicySource": _get_manifest_entry(f"{base_url}Policy", config["Policy"], version, host),
+        "PolicySource": _get_manifest_entry(f"{base_url}Policies", config["Policy"], version, host),
         "ServerKind": 1,
         "OrganizationName": organization_name
     }
