@@ -4,7 +4,7 @@ class Log:
     warning = "[WARN]"
     critical = "[CRIT]"
     error = "[EROR]"
-    debug = "[DEBG]"
+    debug = "[DBUG]"
     danger = "[DAGR]"
 
     def __init__(self):
@@ -13,5 +13,5 @@ class Log:
         self.warning = "[WARN]"
         self.critical = "[CRIT]"
         self.error = "[EROR]"
-        self.debug = "[DEBG]"
+        self.debug = "[DBUG]"
         self.danger = "[DAGR]"

@@ -9,7 +9,7 @@ class Resources:
         self.file_list: list[str] = [f[:-5] for f in os.listdir(f"Datas/{self.path}")]
 
     def refresh(self) -> list[str]:
-        self.file_list = [f[:-5] for f in os.listdir(f"Datas/{self.path}")]
+        self.file_list = [f[:-5] for f in filter(lambda x: x.endswith(".json"), os.listdir(f"Datas/{self.path}"))]
         return self.file_list
 
     def read(self, name: str) -> dict:
@@ -36,8 +36,7 @@ class Resources:
                 json.dump(data, f)
 
     def delete_file(self, name: str) -> None:
-        self.refresh()
-        if name not in self.file_list:
+        if name not in self.refresh():
             raise FileNotFoundError(f"{self.name} {name} not found.")
         else:
             os.remove(f"Datas/{self.path}/{name}.json")
@@ -51,6 +50,15 @@ class Resources:
             raise FileExistsError(f"{self.name} {new_name} exists, please delete it first.")
         else:
             os.renames(f"Datas/{self.path}/{name}.json", f"Datas/{self.path}/{new_name}.json")
+
+    def new(self, name: str) -> None:
+        self.refresh()
+        if name in self.file_list:
+            raise FileExistsError(f"{self.name} {name} exists, please delete it first.")
+        else:
+            with open(f"Datas/{self.path}/{name}.json", "w") as f:
+                json.dump({}, f)
+            self.refresh()
 
     def __repr__(self):
         self.refresh()
@@ -70,11 +78,10 @@ class Resources:
         if item in self.file_list:
             return f"Datas/{self.path}/{item}.json"
         else:
-            if item not in self.file_list:
-                for n in self.file_list:
-                    if n in item or item in n:
-                        raise IndexError(f"{self.name} '{item}' not found. Did you mean '{n}'?")
-                raise IndexError(f"{self.name} '{item}' not found.")
+            for n in self.file_list:
+                if n in item or item in n:
+                    raise IndexError(f"{self.name} '{item}' not found. Did you mean '{n}'?")
+            raise IndexError(f"{self.name} '{item}' not found.")
 
 
 ClassPlans = Resources("ClassPlans", "ClassPlans")
@@ -93,6 +100,11 @@ class _ClientStatus:
         with open("Datas/client_status.json") as f:
             self.client_status = json.load(f)
             return self.client_status
+
+    def update(self, uid):
+        with open("Datas/client_status.json") as f:
+            self.client_status = json.load(f)
+
 
 
 ClientStatus = _ClientStatus()

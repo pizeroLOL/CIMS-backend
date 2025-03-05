@@ -25,23 +25,23 @@ async def get_client_manifest(uid: str=None, version: int=int(time.time())):
         profile_config = Datas.ProfileConfig.profile_config
         _return =  {
             "ClassPlanSource": {
-                "Value": f"http://127.0.0.1:50050/api/v1/client/classPlan?name={profile_config[uid]['ClassPlan']}", # 使用 client_profile 中的配置，默认为 default
+                "Value": f"http://127.0.0.1:50050/api/v1/client/ClassPlan?name={profile_config[uid]['ClassPlan']}", # 使用 client_profile 中的配置，默认为 default
                 "Version": version
             },
             "TimeLayoutSource": {
-                "Value": f"http://127.0.0.1:50050/api/v1/client/timeLayout?name={profile_config[uid]['TimeLayout']}", # 使用 client_profile 中的配置，默认为 default
+                "Value": f"http://127.0.0.1:50050/api/v1/client/TimeLayout?name={profile_config[uid]['TimeLayout']}", # 使用 client_profile 中的配置，默认为 default
                 "Version": version
             },
             "SubjectsSource": {
-                "Value": f"http://127.0.0.1:50050/api/v1/client/subjects?name={profile_config[uid]['Subjects']}", # 使用 client_profile 中的配置，默认为 default
+                "Value": f"http://127.0.0.1:50050/api/v1/client/Subjects?name={profile_config[uid]['Subjects']}", # 使用 client_profile 中的配置，默认为 default
                 "Version": version
             },
             "DefaultSettingsSource": {
-                "Value": f"http://127.0.0.1:50050/api/v1/client/settings?name={profile_config[uid]['Settings']}", # 使用 client_profile 中的配置，默认为 default
+                "Value": f"http://127.0.0.1:50050/api/v1/client/Settings?name={profile_config[uid]['Settings']}", # 使用 client_profile 中的配置，默认为 default
                 "Version": version
             },
             "PolicySource": {
-                "Value": f"http://127.0.0.1:50050/api/v1/client/policy?name={profile_config[uid]['Policy']}", # 使用 client_profile 中的配置，默认为 default
+                "Value": f"http://127.0.0.1:50050/api/v1/client/Policy?name={profile_config[uid]['Policy']}", # 使用 client_profile 中的配置，默认为 default
                 "Version": version
             },
             "ServerKind": 1,
@@ -51,23 +51,23 @@ async def get_client_manifest(uid: str=None, version: int=int(time.time())):
     else:
         return {
             "ClassPlanSource": {
-                "Value": f"http://127.0.0.1:50050/api/v1/client/classPlan?name=default",
+                "Value": f"http://127.0.0.1:50050/api/v1/client/ClassPlan?name=default",
                 "Version": version
             },
             "TimeLayoutSource": {
-                "Value": f"http://127.0.0.1:50050/api/v1/client/timeLayout?name=default",
+                "Value": f"http://127.0.0.1:50050/api/v1/client/TimeLayout?name=default",
                 "Version": version
             },
             "SubjectsSource": {
-                "Value": f"http://127.0.0.1:50050/api/v1/client/subjects?name=default",
+                "Value": f"http://127.0.0.1:50050/api/v1/client/Subjects?name=default",
                 "Version": version
             },
             "DefaultSettingsSource": {
-                "Value": f"http://127.0.0.1:50050/api/v1/client/settings?name=default",
+                "Value": f"http://127.0.0.1:50050/api/v1/client/Settings?name=default",
                 "Version": version
             },
             "PolicySource": {
-                "Value": f"http://127.0.0.1:50050/api/v1/client/policy?name=default",
+                "Value": f"http://127.0.0.1:50050/api/v1/client/Policy?name=default",
                 "Version": version
             },
             "ServerKind": 1,
@@ -75,8 +75,8 @@ async def get_client_manifest(uid: str=None, version: int=int(time.time())):
         }
 
 
-@api.get("/api/v1/client/policy", summary="获取策略")
-async def get_policy(name: str):
+@api.get("/api/v1/client/Policies", summary="获取策略")
+async def get_policies(name: str):
     """
     拉取策略
     :param name: 策略名称
@@ -88,8 +88,8 @@ async def get_policy(name: str):
         raise HTTPException(status_code=404, detail="Policy file not found.")
 
 
-@api.get("/api/v1/client/classPlan", summary="获取课表")
-async def get_class_plan(name: str):
+@api.get("/api/v1/client/ClassPlans", summary="获取课表")
+async def get_class_plans(name: str):
     """获取课表"""
     try:
         return Datas.ClassPlans.read(name)
@@ -97,16 +97,16 @@ async def get_class_plan(name: str):
         raise HTTPException(status_code=404, detail="Class plan file not found.")
 
 
-@api.get("/api/v1/client/subjects", summary="获取科目列表")
-async def get_subjects(name: str):
+@api.get("/api/v1/client/SubjectsSource", summary="获取科目列表")
+async def get_subjects_source(name: str):
     """获取科目列表"""
     try:
         return Datas.SubjectsSource.read(name)
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail="Subject source file not found.")
 
-@api.get("/api/v1/client/timeLayout", summary="获取时间表")
-async def get_time_layout(name: str):
+@api.get("/api/v1/client/TimeLayouts", summary="获取时间表")
+async def get_time_layouts(name: str):
     """获取时间表"""
     try:
         return Datas.TimeLayouts.read(name)
@@ -114,8 +114,8 @@ async def get_time_layout(name: str):
         raise HTTPException(status_code=404, detail="Time layout file not found.")
 
 
-@api.get("/api/v1/client/settings", summary="获取设置")
-async def get_settings(name: str):
+@api.get("/api/v1/client/DefaultSettings", summary="获取设置")
+async def get_default_settings(name: str):
     """获取设置"""
     try:
         return Datas.DefaultSettings.read(name)
@@ -144,6 +144,23 @@ async def get_resource_file_list(resource_type: str):
             return Datas.SubjectsSource.refresh()
         case "TimeLayouts":
             return Datas.TimeLayouts.refresh()
+        case _:
+            raise HTTPException(status_code=404, detail="Resource type invalid.")
+
+
+@api.get("/api/v1/panel/new/{resource_type}", summary="新文件")
+async def new_resource(resource_type: str):
+    match resource_type:
+        case "ClassPlans":
+            return Datas.ClassPlans.new(name=resource_type)
+        case "DefaultSettings":
+            return Datas.DefaultSettings.new(name=resource_type)
+        case "Policies":
+            return Datas.Policies.new(name=resource_type)
+        case "SubjectsSource":
+            return Datas.SubjectsSource.new(name=resource_type)
+        case "TimeLayouts":
+            return Datas.TimeLayouts.new(name=resource_type)
         case _:
             raise HTTPException(status_code=404, detail="Resource type invalid.")
 
@@ -179,9 +196,9 @@ async def save_resource_file_content(resource_type: str, file_name: str, content
 
 
 
-async def start(port=50050):
+async def start(port=50050, host="0.0.0.0"):
     """<UNK>FastAPI<UNK>"""
-    config = uvicorn.Config(app=api, port=port, log_level="debug")
+    config = uvicorn.Config(app=api, port=port, host=host, log_level="debug")
     server = uvicorn.Server(config)
     print("Starting API server...")
     await server.serve()

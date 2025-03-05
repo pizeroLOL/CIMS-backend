@@ -1,8 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { Typography, Paper, Tabs, Tab, Box, CircularProgress, Button, Snackbar, Alert, Grid, useMediaQuery, useTheme } from '@mui/material'; // 引入 Grid, useMediaQuery, useTheme
+import {
+    Typography,
+    Paper,
+    Tabs,
+    Tab,
+    Box,
+    CircularProgress,
+    Button,
+    Snackbar,
+    Alert,
+    Grid,
+    useMediaQuery,
+    useTheme,
+    FormControlLabel,
+    Switch,
+    FormGroup,
+    FormControl
+} from '@mui/material';
 import { apiClient } from '../services/api';
 import ConfigEditor from '../components/ConfigEditor';
-import DescriptionIcon from '@mui/icons-material/Description'; // 确保引入 DescriptionIcon
+import DescriptionIcon from '@mui/icons-material/Description';
 
 interface ConfigManifest {
     [key: string]: {
@@ -11,12 +28,23 @@ interface ConfigManifest {
     };
 }
 
+interface PolicyConfig {
+    DisableProfileClassPlanEditing: boolean;
+    DisableProfileTimeLayoutEditing: boolean;
+    DisableProfileSubjectsEditing: boolean;
+    DisableProfileEditing: boolean;
+    DisableSettingsEditing: boolean;
+    DisableSplashCustomize: boolean;
+    DisableDebugMenu: boolean;
+    AllowExitManagement: boolean;
+}
+
 const resourceTypes = [
     { key: 'ClassPlans', label: '课表' },
     { key: 'TimeLayouts', label: '时间布局' },
     { key: 'SubjectsSource', label: '科目' },
-    { key: 'DefaultSettingsSource', label: '默认设置' },
-    { key: 'PolicySource', label: '策略' },
+    { key: 'DefaultSettings', label: '默认设置' },
+    { key: 'Policies', label: '策略' },
 ];
 
 const ConfigurationManagement: React.FC = () => {
@@ -30,7 +58,9 @@ const ConfigurationManagement: React.FC = () => {
     const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
     const [isEditing, setIsEditing] = useState(false);
     const theme = useTheme();
-    const isSmDown = useMediaQuery(theme.breakpoints.down('sm')); // 判断是否是 sm 以下屏幕
+    const isSmDown = useMediaQuery(theme.breakpoints.down('sm'));
+
+    const [policyConfig, setPolicyConfig] = useState<PolicyConfig | null>(null);
 
     const currentResourceType = resourceTypes[tabValue].key;
 
@@ -63,17 +93,25 @@ const ConfigurationManagement: React.FC = () => {
             fetchConfigContent(currentResourceType, selectedConfigName);
         } else {
             setConfigContent('');
+            setPolicyConfig(null);
         }
     }, [selectedConfigName, currentResourceType]);
 
     const fetchConfigContent = async (resourceType: string, name: string) => {
         setLoading(true);
         try {
-            const response = await apiClient.get(`/api/v1/client/${resourceType.slice(0, -1)}?name=${name}`);
-            setConfigContent(JSON.stringify(response.data, null, 2));
+            const response = await apiClient.get(`/api/v1/client/${resourceType}?name=${name}`);
+            if (resourceType === 'Policies') {
+                setPolicyConfig(response.data);
+                setConfigContent('');
+            } else {
+                setConfigContent(JSON.stringify(response.data, null, 2));
+                setPolicyConfig(null);
+            }
         } catch (error) {
             console.error("Failed to fetch config content:", error);
             setConfigContent('');
+            setPolicyConfig(null);
             handleSnackbarOpen('获取配置文件内容失败', 'error');
         } finally {
             setLoading(false);
@@ -83,6 +121,7 @@ const ConfigurationManagement: React.FC = () => {
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
         setTabValue(newValue);
         setSelectedConfigName(null);
+        setIsEditing(false);
     };
 
     const handleConfigNameClick = (name: string) => {
@@ -94,12 +133,27 @@ const ConfigurationManagement: React.FC = () => {
         if (!selectedConfigName) return;
         setLoading(true);
         try {
-            await apiClient.post(`/api/resources/${currentResourceType}/${selectedConfigName}`, { content: JSON.parse(content) });
+            await apiClient.post(`/api/resources/${currentResourceType}/${selectedConfigName}`, JSON.parse(content));
             handleSnackbarOpen('配置文件保存成功', 'success');
             setIsEditing(false);
         } catch (error) {
             console.error("Failed to save config:", error);
             handleSnackbarOpen('配置文件保存失败', 'error');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleSavePolicyConfig = async () => {
+        if (!selectedConfigName || !policyConfig) return;
+        setLoading(true);
+        try {
+            await apiClient.post(`/api/resources/Policies/${selectedConfigName}`, policyConfig);
+            handleSnackbarOpen('策略配置文件保存成功', 'success');
+            setIsEditing(false);
+        } catch (error) {
+            console.error("Failed to save config:", error);
+            handleSnackbarOpen('策略配置文件保存失败', 'error');
         } finally {
             setLoading(false);
         }
@@ -130,6 +184,14 @@ const ConfigurationManagement: React.FC = () => {
         }
     };
 
+    const handlePolicyConfigChange = (key: keyof PolicyConfig, value: boolean) => {
+        if (policyConfig) {
+            setPolicyConfig({ ...policyConfig, [key]: value });
+        }
+    };
+
+    const isPolicyTab = currentResourceType === "Policies" && policyConfig !== null;
+
     return (
         <div>
             <Typography variant="h4" gutterBottom>
@@ -143,8 +205,8 @@ const ConfigurationManagement: React.FC = () => {
             </Tabs>
 
             <Paper elevation={2} style={{ marginTop: 20, padding: 20 }}>
-                <Grid container spacing={isSmDown ? 0 : 2} direction={isSmDown ? "column" : "row"}> {/* Grid 容器，小屏幕垂直布局 */}
-                    <Grid item xs={12} sm={isSmDown ? 12 : 4} md={3}> {/* 配置文件列表 Grid Item */}
+                <Grid container spacing={isSmDown ? 0 : 2} direction={isSmDown ? "column" : "row"}>
+                    <Grid item xs={12} sm={isSmDown ? 12 : 4} md={3}>
                         <Typography variant="h6" gutterBottom>配置文件列表</Typography>
                         {loading && tabValue === tabValue ? (
                             <div style={{ display: 'flex', justifyContent: 'center', margin: '20px 0' }}>
@@ -173,20 +235,64 @@ const ConfigurationManagement: React.FC = () => {
                         </Box>
                     </Grid>
 
-                    <Grid item xs={12} sm={isSmDown ? 12 : 8} md={9}> {/* 配置文件内容 Grid Item */}
+                    <Grid item xs={12} sm={isSmDown ? 12 : 8} md={9}>
                         <Typography variant="h6" gutterBottom>配置文件内容</Typography>
                         {loading && selectedConfigName ? (
                             <div style={{ display: 'flex', justifyContent: 'center', margin: '20px 0' }}>
                                 <CircularProgress size={24} />
                             </div>
                         ) : (
-                            <ConfigEditor
-                                value={configContent}
-                                onChange={setConfigContent}
-                                onSave={handleSaveConfig}
-                                isEditing={isEditing}
-                                setIsEditing={setIsEditing}
-                            />
+                            <>
+                            {isPolicyTab? (
+                                <FormControl component="fieldset">
+                                    <FormGroup>
+                                        <FormControlLabel
+                                            control={<Switch checked={policyConfig.DisableProfileClassPlanEditing} onChange={(e) => handlePolicyConfigChange('DisableProfileClassPlanEditing', e.target.checked)} />}
+                                            label="禁用课表编辑"
+                                        />
+                                        <FormControlLabel
+                                            control={<Switch checked={policyConfig.DisableProfileTimeLayoutEditing} onChange={(e) => handlePolicyConfigChange('DisableProfileTimeLayoutEditing', e.target.checked)} />}
+                                            label="禁用时间布局编辑"
+                                        />
+                                        <FormControlLabel
+                                            control={<Switch checked={policyConfig.DisableProfileSubjectsEditing} onChange={(e) => handlePolicyConfigChange('DisableProfileSubjectsEditing', e.target.checked)} />}
+                                            label="禁用科目编辑"
+                                        />
+                                        <FormControlLabel
+                                            control={<Switch checked={policyConfig.DisableProfileEditing} onChange={(e) => handlePolicyConfigChange('DisableProfileEditing', e.target.checked)} />}
+                                            label="禁用客户端配置编辑"
+                                        />
+                                        <FormControlLabel
+                                            control={<Switch checked={policyConfig.DisableSettingsEditing} onChange={(e) => handlePolicyConfigChange('DisableSettingsEditing', e.target.checked)} />}
+                                            label="禁用客户端设置编辑"
+                                        />
+                                        <FormControlLabel
+                                            control={<Switch checked={policyConfig.DisableSplashCustomize} onChange={(e) => handlePolicyConfigChange('DisableSplashCustomize', e.target.checked)} />}
+                                            label="禁用客户端启动画面自定义"
+                                        />
+                                        <FormControlLabel
+                                            control={<Switch checked={policyConfig.DisableDebugMenu} onChange={(e) => handlePolicyConfigChange('DisableDebugMenu', e.target.checked)} />}
+                                            label="禁用客户端调试菜单"
+                                        />
+                                        <FormControlLabel
+                                            control={<Switch checked={policyConfig.AllowExitManagement} onChange={(e) => handlePolicyConfigChange('AllowExitManagement', e.target.checked)} />}
+                                            label="允许客户端退出管理"
+                                        />
+                                    </FormGroup>
+                                    <Button variant="contained" color="primary" onClick={handleSavePolicyConfig} disabled={loading}>
+                                            保存
+                                    </Button>
+                                </FormControl>
+                            ) : (
+                                <ConfigEditor
+                                    value={configContent}
+                                    onChange={setConfigContent}
+                                    onSave={handleSaveConfig}
+                                    isEditing={isEditing}
+                                    setIsEditing={setIsEditing}
+                                />
+                            )}
+                            </>
                         )}
                     </Grid>
                 </Grid>
