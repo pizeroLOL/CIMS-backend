@@ -28,5 +28,6 @@ match sys.platform:
             Datas.DefaultSettings.write("default", default_sets)
         os.system("python -m venv venv")
         os.system("./venv/Scripts/pip install -r requirements.txt")
+        os.system("./venv/bin/python -m grpc_tools.protoc --proto_path=. --python_out=. --grpc_python_out=. ./Protobuf/Client/ClientCommandDeliverScReq.proto ./Protobuf/Client/ClientRegisterCsReq.proto ./Protobuf/Command/HeartBeat.proto ./Protobuf/Command/SendNotification.proto ./Protobuf/Enum/CommandTypes.proto ./Protobuf/Enum/Retcode.proto ./Protobuf/Server/ClientCommandDeliverScRsp.proto ./Protobuf/Server/ClientRegisterScRsp.proto ./Protobuf/Service/ClientCommandDeliver.proto ./Protobuf/Service/ClientRegister.proto")
         os.system("./venv/bin/python CIMS.py")
 
