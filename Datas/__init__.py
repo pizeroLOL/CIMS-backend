@@ -2,7 +2,7 @@ import json
 import os
 
 
-class Resources:
+class Resource:
     def __init__(self, path, name=None):
         self.path: str = path
         self.name: str = name if name is not None else path
@@ -84,11 +84,11 @@ class Resources:
             raise IndexError(f"{self.name} '{item}' not found.")
 
 
-ClassPlans = Resources("ClassPlans", "ClassPlans")
-DefaultSettings = Resources("DefaultSettings", "DefaultSettings")
-Policies = Resources("Policies", "Policy")
-SubjectsSource = Resources("SubjectsSource", "SubjectsSource")
-TimeLayouts = Resources("TimeLayouts", "TimeLayouts")
+ClassPlan = Resource("ClassPlan", "ClassPlan")
+DefaultSettings = Resource("DefaultSettings", "DefaultSettings")
+Policy = Resource("Policy", "Policy")
+Subjects = Resource("Subjects", "Subjects")
+TimeLayout = Resource("TimeLayout", "TimeLayout")
 
 
 class _ClientStatus:
