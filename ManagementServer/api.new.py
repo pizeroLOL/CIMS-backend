@@ -99,7 +99,7 @@ async def refresh() -> None:
 
 #region 启动函数
 async def start(port:int=50050):
-    config = uvicorn.Config(app=api, port=port,log_level="debug")
+    config = uvicorn.Config(app=api, port=port, host="0.0.0.0", log_level="debug")
     server = uvicorn.Server(config)
     await server.serve()
     print("API server successfully start on {port}".format(port=port))

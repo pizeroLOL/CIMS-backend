@@ -14,6 +14,25 @@ import json
 #endregion
 
 
+#region 导入 gRPC 库
+from ManagementServer.gRPC import send_command
+#endregion
+
+
+#region 导入 Protobuf 构建文件
+from Protobuf.Client import (ClientCommandDeliverScReq_pb2, ClientCommandDeliverScReq_pb2_grpc,
+                             ClientRegisterCsReq_pb2, ClientRegisterCsReq_pb2_grpc)
+from Protobuf.Command import (SendNotification_pb2, SendNotification_pb2_grpc,
+                              HeartBeat_pb2, HeartBeat_pb2_grpc)
+from Protobuf.Enum import (CommandTypes_pb2, CommandTypes_pb2_grpc,
+                           Retcode_pb2, Retcode_pb2_grpc)
+from Protobuf.Server import (ClientCommandDeliverScRsp_pb2, ClientCommandDeliverScRsp_pb2_grpc,
+                             ClientRegisterScRsp_pb2, ClientRegisterScRsp_pb2_grpc)
+from Protobuf.Service import (ClientCommandDeliver_pb2, ClientCommandDeliver_pb2_grpc,
+                              ClientRegister_pb2, ClientRegister_pb2_grpc)
+#endregion
+
+
 #region 导入 FastAPI 相关库
 import uvicorn
 from fastapi import FastAPI, Query
@@ -104,8 +123,55 @@ async def write(resource_type:str, name:str, request:Request):
 #endregion
 
 
-#region 客户端管理相关 API
-# TODO:客户端管理相关 API
+#region 客户端信息相关 API
+@command.get("/command/clients/list")
+async def list_client():
+    return Datas.Clients.refresh()
+
+
+@command.get("/command/clients/status")
+async def status():
+    return Datas.ClientStatus.refresh()
+#endregion
+
+
+#region 指令下发 API
+@command.get("/command/client/{client_uid}/restart")
+async def restart(client_uid:str):
+    await send_command(client_uid, CommandTypes_pb2.RestartApp)
+
+
+@command.get("/command/client/{client_uid}/send_notification")
+async def send_notification(client_uid: str,
+                            message_mask: str,
+                            message_content: str,
+                            overlay_icon_left: int = 0,
+                            overlay_icon_right: int = 0,
+                            is_emergency: bool = False,
+                            is_speech_enabled: bool = True,
+                            is_effect_enabled: bool = True,
+                            is_sound_enabled: bool = True,
+                            is_topmost: bool = True,
+                            duration_seconds: float = 5.0,
+                            repeat_counts: int = 1):
+    await send_command(client_uid, CommandTypes_pb2.SendNotification,
+                       SendNotification_pb2.SendNotification(
+                           MessageMask=message_mask,
+                           MessageContent=message_content,
+                           OverlayIconLeft=overlay_icon_left,
+                           OverlayIconRight=overlay_icon_right,
+                           IsEmergency=is_emergency,
+                           IsSpeechEnabled=is_speech_enabled,
+                           IsEffectEnabled=is_effect_enabled,
+                           IsSoundEnabled=is_sound_enabled,
+                           IsTopmost=is_topmost,
+                           DurationSeconds=duration_seconds,
+                           RepeatCounts=repeat_counts
+                       ).SerializeToString())
+
+@command.get("/command/client/{client_uid}/update_data")
+async def update_data(client_uid:str):
+    await send_command(client_uid, CommandTypes_pb2.DataUpdated)
 #endregion
 
 
@@ -119,7 +185,7 @@ async def refresh() -> None:
 
 #region 启动函数
 async def start(port:int=50052):
-    config = uvicorn.Config(app=command, port=port,log_level="debug")
+    config = uvicorn.Config(app=command, port=port, host="0.0.0.0", log_level="debug")
     server = uvicorn.Server(config)
     await server.serve()
     print("Command backend successfully start on {port}".format(port=port))
