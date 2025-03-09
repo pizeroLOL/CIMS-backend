@@ -5,13 +5,13 @@
 | 组件 | [`api`](./ManagementServer/api.py)   | [`command`](./ManagementServer/command.py) | [`gRPC`](./ManagementServer/gRPC.py) | [`WebUI`](./webui/README.md)     |
 |----|--------------------------------------|--------------------------------------------|--------------------------------------|----------------------------------|
 | 用途 | 向客户端分发配置文件                           | 通过API以集控服务器为中介获取客户端状态、向客户端发送指令             | 与客户端建立gRPC链接                         | 集控服务器网页前端（同时用作端口转发）              |
-| 端口 | [50050](http://127.0.0.1:50050/docs) | [50052](http://127.0.0.1:50052/docs)       | 50051                                | [50053](http://127.0.0.1:50053/) |
+| 端口 | [50050](http://127.0.0.1:50050/docs) | [50052](http://127.0.0.1:50052/docs)       | 50051                                | [50053](http://localhost:50053/) |
 
 ## 配置
 
 运行 `python -m pip install -r requirements.txt` 以安装依赖
 
-运行 `python -m grpc_tools.protoc --proto_path=. --python_out=. --grpc_python_out=. ./Protobuf/Client/ClientCommandDeliverScReq.proto ./Protobuf/Client/ClientRegisterCsReq.proto ./Protobuf/Command/HeartBeat.proto ./Protobuf/Command/SendNotification.proto ./Protobuf/Enum/CommandTypes.proto ./Protobuf/Enum/Retcode.proto ./Protobuf/Server/ClientCommandDeliverScRsp.proto ./Protobuf/Server/ClientRegisterScRsp.proto ./Protobuf/Service/ClientCommandDeliver.proto ./Protobuf/Service/ClientRegister.proto` 以编译 `.proto` 文件
+运行 `python -m grpc_tools.protoc --proto_path=. --python_out=. --grpc_python_out=. ./Protobuf/Client/ClientCommandDeliverScReq.proto ./Protobuf/Client/ClientRegisterCsReq.proto ./Protobuf/Command/HeartBeat.proto ./Protobuf/Command/SendNotification.proto ./Protobuf/Enum/CommandTypes.proto ./Protobuf/Enum/Retcode.proto ./Protobuf/Server/ClientCommandDeliverScRsp.proto ./Protobuf/Server/ClientRegisterScRsp.proto ./Protobuf/Service/ClientCommandDeliver.proto ./Protobuf/Service/ClientRegister.proto` 以构建 `.proto` 文件
 
 现在，你可以直接启动 [`main.py`](./main.py)，也可以到到 [`Notebook`](./ServerPresentation.ipynb) 阅读一些其它的相关信息。
 
@@ -49,16 +49,17 @@
     cd ClassIslandManagementServer.py
     ```
     *   如果你不使用 Git，可以下载 ZIP 压缩包并解压。
-3.  **安装依赖:**
+3.  **创建 venv 并安装依赖:**
     ```bash
-    python -m pip install -r requirements.txt
+    python -m venv venv
+    ./venv/bin/python -m pip install -r requirements.txt
     ```
     这将会安装 Python 相关的依赖。
-4. **编译 Protobuf 文件:**
+4. **构建 Protobuf 文件:**
     ```bash
     python -m grpc_tools.protoc --proto_path=. --python_out=. --grpc_python_out=. ./Protobuf/Client/ClientCommandDeliverScReq.proto ./Protobuf/Client/ClientRegisterCsReq.proto ./Protobuf/Command/HeartBeat.proto ./Protobuf/Command/SendNotification.proto ./Protobuf/Enum/CommandTypes.proto ./Protobuf/Enum/Retcode.proto ./Protobuf/Server/ClientCommandDeliverScRsp.proto ./Protobuf/Server/ClientRegisterScRsp.proto ./Protobuf/Service/ClientCommandDeliver.proto ./Protobuf/Service/ClientRegister.proto
     ```
-    这将会编译 `.proto` 文件生成对应的 Python 代码，以用于 gRPC 通信。
+    这将会构建 `.proto` 文件生成对应的 Python 代码，以用于 gRPC 通信。
 5.  **构建 WebUI (可选):**
     *   如果你不需要 WebUI，可以跳过此步骤。
     *   导航到 `webui` 目录:
@@ -73,26 +74,30 @@
         ```bash
         npm run build
         ```
+    *   运行 WebUI:
+        ```bash
+        npm run preview
+        ```
     *   构建完成后，将生成 `dist` 文件夹，其中包含构建后的 WebUI 文件。
     *   构建出的 WebUI 文件会被内置于集控服务器中，无需手动部署。
     * 结束构建后，返回根目录 `cd ..`
 6.  **启动服务器:**
-    *   **使用 `main.py`:**
+    *   **使用 `start.py`:**
         ```bash
-        python main.py
+        python start.py
         ```
-        这将以默认配置启动所有服务器组件（gRPC、command、API）。
+        这将启动一个引导，并启动所有服务器组件（gRPC、command、API）。
     *   **使用 `CIMS.py` (推荐):**
         ```bash
         python CIMS.py
         ```
         或者，使用一些参数：
         ```bash
-        python CIMS.py -c my_settings.json -g 60000 -a 60001 -m 60002 -H 127.0.0.1
+        python CIMS.py -g 60000 -a 60001 -m 60002
         python CIMS.py -l
         ```
         这将提供更多的控制选项，例如:
-        * `-c my_settings.json`: 从自定义的 `my_settings.json` 文件加载配置。
+        * `-c settings.json`: 从自定义的 `settings.json` 文件加载配置。
         * `-g 60000`: 将 gRPC 端口设置为 60000。
         * `-a 60001`: 将 API 端口设置为 60001。
         * `-m 60002`: 将 command 端口设置为 60002。
@@ -103,7 +108,10 @@
 8. **访问 API:**
    * 你可以在浏览器中访问 `http://127.0.0.1:50050/docs`(或你设置的端口)查看 API 文档.
 
-## 功能清单
+> ## 注意
+> 目前所有的 README Guide 和 start.py 都是在 Windows 环境开发的，在 Linux 环境下请自行摸索，谢谢！
+
+## ~~功能清单~~
 
 ## Star 历史
 [![Stargazers over time](https://starchart.cc/kaokao221/ClassIslandManagementServer.py.svg?variant=adaptive)](https://starchart.cc/kaokao221/ClassIslandManagementServer.py)
