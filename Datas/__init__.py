@@ -35,14 +35,14 @@ class Resource:
             with open(f"Datas/{self.path}/{name}.json", "w") as f:
                 json.dump(data, f)
 
-    def delete_file(self, name: str) -> None:
+    def delete(self, name: str) -> None:
         if name not in self.refresh():
             raise FileNotFoundError(f"{self.name} {name} not found.")
         else:
             os.remove(f"Datas/{self.path}/{name}.json")
             self.refresh()
 
-    def rename_file(self, name: str, new_name: str) -> None:
+    def rename(self, name: str, new_name: str) -> None:
         self.refresh()
         if name not in self.file_list:
             raise FileNotFoundError(f"{self.name} {name} not found.")
