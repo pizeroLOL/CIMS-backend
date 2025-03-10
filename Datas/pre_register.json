@@ -1,0 +1,9 @@
+{
+  "TEST": {
+        "ClassPlan": "default",
+        "Settings": "default",
+        "Subjects": "default",
+        "Policy": "default",
+        "TimeLayout": "default"
+    }
+}

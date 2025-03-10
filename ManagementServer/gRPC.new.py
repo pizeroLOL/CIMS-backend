@@ -1,5 +1,6 @@
 #! -*- coding:utf-8 -*-
 import grpc.aio
+from fastapi import HTTPException
 
 #region 导入项目内建库
 import Datas
@@ -70,5 +71,76 @@ class ClientCommandDeliverServicer(ClientCommandDeliver_pb2_grpc.ClientCommandDe
         self.clients[client_uid] = context
         Datas.ClientStatus.update(client_uid)
 
+        try:
+            async for request in request_iterator:
+                match request:
+                    case CommandTypes_pb2.Ping:
+                        Datas.ClientStatus.update(client_uid)
+                        log.log("Receive ping from {client_uid}".format(client_uid=client_uid), QuickValues.Log.info)
+                    case _:
+                        log.log("Unexpected request {request} received from {client_uid}".format(request=request, client_uid=client_uid))
+        except Exception as e:
+            log.log("Client {client_uid} disconnected: {e}".format(client_uid=client_uid, e=e), QuickValues.Log.info)
+        finally:
+            self.clients.pop(client_uid, None)
+            Datas.ClientStatus.offline(client_uid)
 #endregion
 
+
+#region 命令推送器
+async def command(client_uid:str, command_type:CommandTypes_pb2.CommandTypes, payload:bytes=b''):
+    servicer = ClientCommandDeliverServicer()
+    if client_uid not in servicer.clients:
+        log.log("Send {command} to {client_uid}, failed.".format(command=command_type, client_uid=client_uid), QuickValues.Log.error)
+        raise HTTPException(status_code=404, detail=f"Client not found or not connected: {client_uid}")
+    log.log("Send {command} to {client_uid}".format(command=command_type, client_uid=client_uid), QuickValues.Log.info)
+    await servicer.clients[client_uid].write(ClientCommandDeliver_pb2.ClientCommandDeliverScRsp(
+        RetCode=Retcode_pb2.Success,
+        Type=command_type,
+        Payload=payload
+    ))
+#endregion
+
+
+#region 注册服务
+class ClientRegisterServicer(ClientRegister_pb2_grpc.ClientRegisterServicer):
+    async def Register(self, request:ClientRegisterCsReq_pb2.ClientRegisterCsReq,
+                       context:grpc.aio.ServicerContext) -> ClientRegisterScRsp_pb2.ClientRegisterScRsp:
+        clients = Datas.Clients.refresh()
+        client_uid = request.clientUid
+        client_id = request.clientId
+        Datas.Clients.register(client_uid, client_id)
+        if client_uid in clients:
+            log.log("Client {client_uid} registered as {client_id}, but register again.".format(
+                client_uid=client_uid, client_id=client_id), QuickValues.Log.warning)
+            return ClientRegisterScRsp_pb2.ClientRegisterScRsp(Retcode=Retcode_pb2.Registered,
+                                                               Message=f"Client already registered: {client_uid}")
+        else:
+            Datas.ClientStatus.register(client_uid, client_id)
+            log.log("Client {client_uid} registered as {client_id}".format(
+                client_uid=client_uid, client_id=client_id), QuickValues.Log.info)
+            return ClientRegisterScRsp_pb2.ClientRegisterScRsp(Retcode=Retcode_pb2.Success,
+                                                               Message=f"Client registered: {client_uid}")
+
+    async def UnRegister(self, request, context):
+        return ClientRegisterScRsp_pb2.ClientRegisterScRsp(Retcode=Retcode_pb2.ServerInternalError,
+                                                           Message="Not implemented")
+#endregion
+
+
+#region 启动函数
+async def start(port=50051):
+    server = grpc.aio.server()
+    ClientRegister_pb2_grpc.add_ClientRegisterServicer_to_server(ClientRegisterServicer(), server)
+    ClientCommandDeliver_pb2_grpc.add_ClientCommandDeliverServicer_to_server(ClientCommandDeliverServicer(), server)
+    server.add_insecure_port("0.0.0.0:{port}".format(port=port))
+    log.log("Starting gRPC server on {listen_addr}".format(listen_addr="0.0.0.0:{port}".format(port=port)), QuickValues.Log.info)
+    await server.start()
+    await server.wait_for_termination()
+#endregion
+
+
+#region 不接受直接运行
+if __name__ == "__main__":
+    log.log(message="Directly started, refused.", status=QuickValues.Log.error)
+#endregion

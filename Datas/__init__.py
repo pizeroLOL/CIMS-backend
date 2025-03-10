@@ -1,5 +1,6 @@
 import json
 import os
+import time
 
 
 class Resource:
@@ -96,14 +97,23 @@ class _ClientStatus:
         with open("Datas/client_status.json") as f:
             self.client_status: dict[str: [dict[str: bool | float]]] = json.load(f)
 
-    def refresh(self) -> dict[str: [dict[str: bool | float]]]:
+    async def refresh(self) -> dict[str: [dict[str: bool | float]]]:
         with open("Datas/client_status.json") as f:
             self.client_status = json.load(f)
             return self.client_status
 
-    def update(self, uid):
-        with open("Datas/client_status.json") as f:
-            self.client_status = json.load(f)
+    async def update(self, uid):
+        self.client_status[uid] = {
+            "isOnline": True,
+            "lastHeartbeat": time.time()
+        }
+        with open("Datas/client_status.json", "w") as f:
+            json.dump(self.client_status, f)
+
+    async def offline(self, uid):
+        self.client_status[uid]["isOnline"] = False
+        with open("Datas/client_status.json", "w") as f:
+            json.dump(self.client_status, f)
 
 
 
@@ -120,6 +130,11 @@ class _Clients:
             self.clients = json.load(f)
             return self.clients
 
+    async def register(self, uid, id):
+        self.clients[uid] = id
+        with open("Datas/clients.json", "w") as f:
+            json.dump(self.clients, f)
+
 
 Clients = _Clients()
 
@@ -133,6 +148,21 @@ class _ProfileConfig:
         with open("Datas/profile_config.json") as f:
             self.profile_config = json.load(f)
             return self.profile_config
+
+    def register(self, uid, id):
+        with open("Datas/pre_register.json") as f:
+            try:
+                self.profile_config["uid"] = json.load(f)["id"]
+            except KeyError:
+                self.profile_config["uid"] = {
+                    "ClassPlan": "default",
+                    "Settings": "default",
+                    "Subjects": "default",
+                    "Policy": "default",
+                    "TimeLayout": "default"
+                }
+        with open("Datas/profile_config.json", "w") as f:
+            json.dump(self.profile_config, f)
 
 
 ProfileConfig = _ProfileConfig()
