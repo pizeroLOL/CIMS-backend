@@ -78,7 +78,7 @@ const ConfigurationManagement: React.FC = () => {
     const fetchConfigNames = async (resourceType: string) => {
         setLoading(true);
         try {
-            const response = await apiClient.get(`/api/v1/panel/${resourceType}`);
+            const response = await apiClient.get(`/command/datas/${resourceType}/list`);
             setConfigNames(response.data);
             if (response.data.length > 0) {
                 setSelectedConfigName(response.data[0]);
