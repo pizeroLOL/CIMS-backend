@@ -140,7 +140,7 @@ const ConfigurationManagement: React.FC = () => {
         if (!selectedConfigName) return;
         setLoading(true);
         try {
-            await apiClient.post(`/command/datas/${currentResourceType}?=${selectedConfigName}`, JSON.parse(content));
+            await apiClient.post(`/command/datas/${currentResourceType}?name=${selectedConfigName}`, JSON.parse(content));
             handleSnackbarOpen('配置文件保存成功', 'success');
             setIsEditing(false);
         } catch (error) {
@@ -155,7 +155,7 @@ const ConfigurationManagement: React.FC = () => {
         if (!selectedConfigName || !policyConfig) return;
         setLoading(true);
         try {
-            await apiClient.post(`/command/datas/Policy?=${selectedConfigName}`, policyConfig);
+            await apiClient.post(`/command/datas/Policy?name=${selectedConfigName}`, policyConfig);
             handleSnackbarOpen('策略配置文件保存成功', 'success');
             setIsEditing(false);
         } catch (error) {

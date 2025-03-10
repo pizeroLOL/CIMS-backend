@@ -1,6 +1,5 @@
 #! -*- coding:utf-8 -*-
 
-
 #region Presets
 #region 导入项目内建库
 import Datas
@@ -36,6 +35,7 @@ from Protobuf.Service import (ClientCommandDeliver_pb2, ClientCommandDeliver_pb2
 
 #region 导入 FastAPI 相关库
 import uvicorn
+from starlette.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, Query
 from fastapi.requests import Request
 from fastapi.responses import JSONResponse, HTMLResponse, FileResponse, PlainTextResponse, RedirectResponse, StreamingResponse
@@ -58,8 +58,14 @@ Settings = _Settings()
 #endregion
 
 
-#region 定义 API
+#region 定义 API 并声明 CORS
 command = FastAPI()
+command.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
 #endregion
 
 
@@ -70,7 +76,7 @@ log = logger.Logger()
 
 
 #region Main
-#region 配置文件管理相关 API
+#region 客户端配置文件管理相关 API
 @command.get("/command/datas/{resource_type}/create")
 async def create(resource_type:str, name:str) -> None:
     match resource_type:
@@ -114,7 +120,7 @@ async def rename(resource_type:str, name:str, target:str) -> None:
             log.log("Resource {resource_type}[{name}] renamed into {target}".format(resource_type=resource_type, name=name, target=target), QuickValues.Log.info)
             return getattr(Datas, resource_type).rename(name, target)
         case _:
-            log.log("Unexpected {resource_type}[{name}] not renamed into {target}".format(resource_type=resource_type, name=name, target=target), QuickValues.Log.eooro)
+            log.log("Unexpected {resource_type}[{name}] not renamed into {target}".format(resource_type=resource_type, name=name, target=target), QuickValues.Log.error)
             raise HTTPException(status_code=404)
 
 
@@ -133,6 +139,21 @@ async def write(resource_type:str, name:str, request:Request):
         case _:
             log.log("Resource {resource_type}[{name}] not written with {count} bytes.".format(resource_type=resource_type, name=name, count=len(str(request.body()))), QuickValues.Log.error)
             raise HTTPException(status_code=404)
+#endregion
+
+
+#region 服务器配置文件管理相关 API
+@command.get("/command/server/settings")
+async def setting():
+    log.log("Settings gotten.", QuickValues.Log.info)
+    return Settings.conf_dict
+
+
+@command.post("/command/server/settings")
+async def update_settings(request:Request):
+    log.log("Settings changed.", QuickValues.Log.critical)
+    with open(Settings.conf_name, "w") as f:
+        json.dump(request.body(), f)
 #endregion
 
 

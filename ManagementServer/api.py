@@ -18,7 +18,8 @@ import json
 
 #region 导入 FastAPI 相关库
 import uvicorn
-from fastapi import FastAPI
+from starlette.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, Query
 from fastapi.requests import Request
 from fastapi.responses import JSONResponse, HTMLResponse, FileResponse, PlainTextResponse, RedirectResponse, StreamingResponse
 from fastapi.exceptions import HTTPException
@@ -42,6 +43,12 @@ Settings = _Settings()
 
 #region 定义 API
 api = FastAPI()
+api.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
 #endregion
 
 

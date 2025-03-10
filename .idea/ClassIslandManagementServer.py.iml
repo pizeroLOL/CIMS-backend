@@ -9,6 +9,7 @@
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="PackageRequirementsSettings">
+    <option name="versionSpecifier" value="不指定版本" />
     <option name="keepMatchingSpecifier" value="false" />
   </component>
 </module>
