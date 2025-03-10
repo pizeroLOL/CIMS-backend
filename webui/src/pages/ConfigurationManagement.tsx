@@ -43,11 +43,11 @@ interface PolicyConfig {
 }
 
 const resourceTypes = [
-    { key: 'ClassPlans', label: '课表' },
-    { key: 'TimeLayouts', label: '时间布局' },
-    { key: 'SubjectsSource', label: '科目' },
+    { key: 'ClassPlan', label: '课表' },
+    { key: 'TimeLayout', label: '时间布局' },
+    { key: 'Subjects', label: '科目' },
     { key: 'DefaultSettings', label: '默认设置' },
-    { key: 'Policies', label: '策略' },
+    { key: 'Policy', label: '策略' },
 ];
 
 const ConfigurationManagement: React.FC = () => {
@@ -140,7 +140,7 @@ const ConfigurationManagement: React.FC = () => {
         if (!selectedConfigName) return;
         setLoading(true);
         try {
-            await apiClient.post(`/api/resources/${currentResourceType}/${selectedConfigName}`, JSON.parse(content));
+            await apiClient.post(`/command/datas/${currentResourceType}?=${selectedConfigName}`, JSON.parse(content));
             handleSnackbarOpen('配置文件保存成功', 'success');
             setIsEditing(false);
         } catch (error) {
@@ -155,7 +155,7 @@ const ConfigurationManagement: React.FC = () => {
         if (!selectedConfigName || !policyConfig) return;
         setLoading(true);
         try {
-            await apiClient.post(`/api/resources/Policies/${selectedConfigName}`, policyConfig);
+            await apiClient.post(`/command/datas/Policy?=${selectedConfigName}`, policyConfig);
             handleSnackbarOpen('策略配置文件保存成功', 'success');
             setIsEditing(false);
         } catch (error) {
@@ -200,7 +200,7 @@ const ConfigurationManagement: React.FC = () => {
         }
         setLoading(true);
         try {
-            await apiClient.get(`/api/v1/panel/new/${currentResourceType}?name=${newConfigName}`);
+            await apiClient.get(`/command/datas/${currentResourceType}/create?name=${newConfigName}`);
             handleSnackbarOpen('新增配置文件成功', 'success');
             fetchConfigNames(currentResourceType);
             handleCloseAddDialog();
@@ -212,11 +212,22 @@ const ConfigurationManagement: React.FC = () => {
         }
     };
 
-    const handleDeleteConfig = () => {
-        if (selectedConfigName) {
-            alert(`删除配置 ${selectedConfigName} 功能待实现`);
-        } else {
-            alert('请先选择要删除的配置文件');
+    const handleDeleteConfig = async () => {
+        if (!newConfigName.trim()) {
+            handleSnackbarOpen('配置文件名不能为空', 'error');
+            return;
+        }
+        setLoading(true);
+        try {
+            await apiClient.get(`/command/datas/${currentResourceType}/delete?name=${newConfigName}`);
+            handleSnackbarOpen('删除配置文件成功', 'success');
+            fetchConfigNames(currentResourceType);
+            handleCloseAddDialog();
+        } catch (error) {
+            console.error("Failed to add config:", error);
+            handleSnackbarOpen('删除配置文件失败', 'error');
+        } finally {
+            setLoading(false);
         }
     };
 

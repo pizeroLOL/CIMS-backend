@@ -18,7 +18,7 @@ const Overview: React.FC = () => {
     const fetchClientData = async () => {
       setLoading(true);
       try {
-        const clientsResponse = await apiClient.get('/command/clients');
+        const clientsResponse = await apiClient.get('/command/clients/list');
         const statusResponse = await apiClient.get('/command/clients/status');
 
         const clients = clientsResponse.data;

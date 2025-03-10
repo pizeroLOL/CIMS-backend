@@ -50,7 +50,7 @@ const DeviceManagement: React.FC = () => {
     const fetchClientsData = async () => {
         setLoading(true);
         try {
-            const clientsResponse = await apiClient.get('/command/clients');
+            const clientsResponse = await apiClient.get('/command/clients/list');
             const statusResponse = await apiClient.get('/command/clients/status');
             const clientsData = clientsResponse.data;
             const statusData: ClientStatus = statusResponse.data;
@@ -93,7 +93,7 @@ const DeviceManagement: React.FC = () => {
 
     const handleRestartClient = async (uid: string, clientId: string) => {
         try {
-            await apiClient.get(`/command/clients/${uid}/restart`);
+            await apiClient.get(`/command/client/${uid}/restart`);
             handleSnackbarOpen(`客户端 ${clientId || uid} 重启指令已发送`, 'success');
         } catch (error: any) {
             if (error.response?.status === 404) {
@@ -122,7 +122,7 @@ const DeviceManagement: React.FC = () => {
 
     const handleUpdateClient = async (uid: string, clientId: string) => {
         try {
-            await apiClient.get(`/command/clients/${uid}/update`);
+            await apiClient.get(`/command/client/${uid}/update_data`);
             handleSnackbarOpen(`客户端 ${clientId || uid} 更新配置指令已发送`, 'success');
         } catch (error: any) {
             if (error.response?.status === 404) {
@@ -187,7 +187,7 @@ const DeviceManagement: React.FC = () => {
                     repeat_counts: repeatCounts.toString(),
                 });
 
-                await apiClient.get(`/command/clients/${uid}/notify?${params.toString()}`);
+                await apiClient.get(`/command/client/${uid}/send_notification?${params.toString()}`);
                 successCount++;
             } catch (error: any) {
                 console.error(`Failed to send notification to client ${clientId || uid}:`, error);

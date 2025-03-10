@@ -97,12 +97,12 @@ class _ClientStatus:
         with open("Datas/client_status.json") as f:
             self.client_status: dict[str: [dict[str: bool | float]]] = json.load(f)
 
-    async def refresh(self) -> dict[str: [dict[str: bool | float]]]:
+    def refresh(self) -> dict[str: [dict[str: bool | float]]]:
         with open("Datas/client_status.json") as f:
             self.client_status = json.load(f)
             return self.client_status
 
-    async def update(self, uid):
+    def update(self, uid):
         self.client_status[uid] = {
             "isOnline": True,
             "lastHeartbeat": time.time()
@@ -110,11 +110,10 @@ class _ClientStatus:
         with open("Datas/client_status.json", "w") as f:
             json.dump(self.client_status, f)
 
-    async def offline(self, uid):
+    def offline(self, uid):
         self.client_status[uid]["isOnline"] = False
         with open("Datas/client_status.json", "w") as f:
             json.dump(self.client_status, f)
-
 
 
 ClientStatus = _ClientStatus()
@@ -130,7 +129,7 @@ class _Clients:
             self.clients = json.load(f)
             return self.clients
 
-    async def register(self, uid, id):
+    def register(self, uid, id):
         self.clients[uid] = id
         with open("Datas/clients.json", "w") as f:
             json.dump(self.clients, f)
@@ -144,6 +143,9 @@ class _ProfileConfig:
         with open("Datas/profile_config.json") as f:
             self.profile_config: dict[str: dict[str: str]] = json.load(f)
 
+        with open("Datas/pre_register.json") as f:
+            self.pre_registers = json.load(f)
+
     def refresh(self) -> dict[str: dict[str: str]]:
         with open("Datas/profile_config.json") as f:
             self.profile_config = json.load(f)
@@ -152,9 +154,9 @@ class _ProfileConfig:
     def register(self, uid, id):
         with open("Datas/pre_register.json") as f:
             try:
-                self.profile_config["uid"] = json.load(f)["id"]
+                self.profile_config[uid] = json.load(f)[id]
             except KeyError:
-                self.profile_config["uid"] = {
+                self.profile_config[uid] = {
                     "ClassPlan": "default",
                     "Settings": "default",
                     "Subjects": "default",
@@ -163,6 +165,20 @@ class _ProfileConfig:
                 }
         with open("Datas/profile_config.json", "w") as f:
             json.dump(self.profile_config, f)
+
+    def pre_register(self, id, conf=None):
+        if conf is None:
+            conf = {
+                "ClassPlan": "default",
+                "Settings": "default",
+                "Subjects": "default",
+                "Policy": "default",
+                "TimeLayout": "default"
+            }
+        self.pre_registers[id] = conf
+        with open("Datas/pre_register.json", "w") as f:
+            json.dump(self.pre_registers, f)
+
 
 
 ProfileConfig = _ProfileConfig()

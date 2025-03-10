@@ -1,112 +1,160 @@
-import asyncio
-import json
-import os
-import time
+#! -*- coding:utf-8 -*-
+
+
+#region Presets
+#region 导入项目内建库
 import Datas
+import logger
+import BuildInClasses
+import QuickValues
+#endregion
 
+
+#region 导入辅助库
+import json
+#endregion
+
+
+#region 导入 gRPC 库
+from ManagementServer.gRPC import command
+#endregion
+
+
+#region 导入 Protobuf 构建文件
+from Protobuf.Client import (ClientCommandDeliverScReq_pb2, ClientCommandDeliverScReq_pb2_grpc,
+                             ClientRegisterCsReq_pb2, ClientRegisterCsReq_pb2_grpc)
+from Protobuf.Command import (SendNotification_pb2, SendNotification_pb2_grpc,
+                              HeartBeat_pb2, HeartBeat_pb2_grpc)
+from Protobuf.Enum import (CommandTypes_pb2, CommandTypes_pb2_grpc,
+                           Retcode_pb2, Retcode_pb2_grpc)
+from Protobuf.Server import (ClientCommandDeliverScRsp_pb2, ClientCommandDeliverScRsp_pb2_grpc,
+                             ClientRegisterScRsp_pb2, ClientRegisterScRsp_pb2_grpc)
+from Protobuf.Service import (ClientCommandDeliver_pb2, ClientCommandDeliver_pb2_grpc,
+                              ClientRegister_pb2, ClientRegister_pb2_grpc)
+#endregion
+
+
+#region 导入 FastAPI 相关库
 import uvicorn
-from fastapi import FastAPI, HTTPException
-
-from ManagementServer.gRPC import send_command
-
-# 导入生成的protobuf和grpc文件
-from Protobuf.Client import ClientCommandDeliverScReq_pb2, ClientRegisterCsReq_pb2
-from Protobuf.Command import SendNotification_pb2
-from Protobuf.Enum import CommandTypes_pb2, Retcode_pb2
-from Protobuf.Server import ClientCommandDeliverScRsp_pb2, ClientRegisterScRsp_pb2
-from Protobuf.Service import (ClientCommandDeliver_pb2_grpc,
-                              ClientRegister_pb2_grpc)
-
-# 数据存储目录
-DATA_DIR = "Datas"
-CLIENTS_FILE = os.path.join(DATA_DIR, "clients.json")
-CLIENT_STATUS_FILE = os.path.join(DATA_DIR, "client_status.json")
-
-# 确保数据目录存在
-os.makedirs(DATA_DIR, exist_ok=True)
+from fastapi import FastAPI, Query
+from fastapi.requests import Request
+from fastapi.responses import JSONResponse, HTMLResponse, FileResponse, PlainTextResponse, RedirectResponse, StreamingResponse
+from fastapi.exceptions import HTTPException
+#endregion
 
 
-# region 数据操作函数
-def load_clients():
-    """加载客户端列表"""
+#region 导入配置文件
+class _Settings:
+    def __init__(self):
+        self.conf_name:str = "settings.json"
+        self.conf_dict:dict = json.load(open(self.conf_name))
+
+    @property
+    async def refresh(self) -> dict:
+        self.conf_dict = json.load(open(self.conf_name))
+        return self.conf_dict
+
+Settings = _Settings()
+#endregion
+
+
+#region 定义 API
+command = FastAPI()
+#endregion
+
+
+#region 内建辅助函数和辅助参量
+log = logger.Logger()
+#endregion
+#endregion
+
+
+#region Main
+#region 配置文件管理相关 API
+@command.get("/command/datas/{resource_type}/create")
+async def create(resource_type:str, name:str) -> None:
+    match resource_type:
+        case "ClassPlan" | "DefaultSettings" | "Policy" | "Subjects" | "TimeLayout":
+            log.log("{resource_type}[{name}] Created.".format(resource_type=resource_type, name=name), QuickValues.Log.info)
+            return getattr(Datas, resource_type).new(name)
+        case _:
+            log.log("Unexpected {resource_type}[{name}] not created.".format(resource_type=resource_type, name=name), QuickValues.Log.error)
+            raise HTTPException(status_code=404)
+
+
+@command.delete("/command/datas/{resource_type}")
+@command.delete("/command/datas/{resource_type}/")
+@command.delete("/command/datas/{resource_type}/delete")
+@command.get("/command/datas/{resource_type}/delete")
+async def delete(resource_type:str, name:str) -> None:
+    match resource_type:
+        case "ClassPlan" | "DefaultSettings" | "Policy" | "Subjects" | "TimeLayout":
+            log.log("{resource_type}[{name}] deleted.".format(resource_type=resource_type, name=name), QuickValues.Log.info)
+            return getattr(Datas, resource_type).delete(name)
+        case _:
+            log.log("Unexpected {resource_type}[{name}] not deleted.".format(resource_type=resource_type, name=name), QuickValues.Log.error)
+            raise HTTPException(status_code=404)
+
+
+@command.get("/command/datas/{resource_type}/list")
+async def _list(resource_type:str) -> list[str]:
+    match resource_type:
+        case "ClassPlan" | "DefaultSettings" | "Policy" | "Subjects" | "TimeLayout":
+            log.log("List {resource_type}.".format(resource_type=resource_type), QuickValues.Log.info)
+            return getattr(Datas, resource_type).refresh()
+        case _:
+            log.log("Unexpected {resource_type} bot listed..".format(resource_type=resource_type), QuickValues.Log.error)
+            raise HTTPException(status_code=404)
+
+
+@command.get("/command/datas/{resource_type}/rename")
+async def rename(resource_type:str, name:str, target:str) -> None:
+    match resource_type:
+        case "ClassPlan" | "DefaultSettings" | "Policy" | "Subjects" | "TimeLayout":
+            log.log("Resource {resource_type}[{name}] renamed into {target}".format(resource_type=resource_type, name=name, target=target), QuickValues.Log.info)
+            return getattr(Datas, resource_type).rename(name, target)
+        case _:
+            log.log("Unexpected {resource_type}[{name}] not renamed into {target}".format(resource_type=resource_type, name=name, target=target), QuickValues.Log.eooro)
+            raise HTTPException(status_code=404)
+
+
+@command.put("/command/datas/{resource_type}")
+@command.put("/command/datas/{resource_type}/")
+@command.put("/command/datas/{resource_type}/write")
+@command.post("/command/datas/{resource_type}")
+@command.post("/command/datas/{resource_type}/")
+@command.post("/command/datas/{resource_type}/write")
+@command.get("/command/datas/{resource_type}/write")
+async def write(resource_type:str, name:str, request:Request):
+    match resource_type:
+        case "ClassPlan" | "DefaultSettings" | "Policy" | "Subjects" | "TimeLayout":
+            log.log("Resource {resource_type}[{name}] written with {count} bytes.".format(resource_type=resource_type, name=name, count=len(str(request.body()))), QuickValues.Log.info)
+            return getattr(Datas, resource_type).write(name, await request.body())
+        case _:
+            log.log("Resource {resource_type}[{name}] not written with {count} bytes.".format(resource_type=resource_type, name=name, count=len(str(request.body()))), QuickValues.Log.error)
+            raise HTTPException(status_code=404)
+#endregion
+
+
+#region 客户端信息相关 API
+@command.get("/command/clients/list")
+async def list_client():
     return Datas.Clients.refresh()
 
 
-def save_clients(clients):
-    """保存客户端列表"""
-    with open(CLIENTS_FILE, "w", encoding="utf-8") as f:
-        json.dump(clients, f, indent=4, ensure_ascii=True)
+@command.get("/command/clients/status")
+async def status():
+    return Datas.ClientStatus.refresh()
+#endregion
 
 
-def load_client_status():
-    """加载客户端状态"""
-    if os.path.exists(CLIENT_STATUS_FILE):
-        with open(CLIENT_STATUS_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    return {}
+#region 指令下发 API
+@command.get("/command/client/{client_uid}/restart")
+async def restart(client_uid:str):
+    await command(client_uid, CommandTypes_pb2.RestartApp)
 
 
-def save_client_status(status):
-    """保存客户端状态"""
-    with open(CLIENT_STATUS_FILE, "w", encoding="utf-8") as f:
-        json.dump(status, f, indent=4, ensure_ascii=True)
-
-command = FastAPI(title="ClassIsland Management Server",
-                  description="集控服务器API",
-                  version="1.0.0", )
-
-
-@command.get("/command/clients", summary="获取所有已注册客户端")
-async def get_clients():
-    """获取所有已注册的客户端列表"""
-    return load_clients()
-
-
-@command.get("/command/clients/status", summary="获取所有客户端状态")
-async def get_all_client_status():
-    """
-    获取所有客户端的状态。
-    """
-    status = load_client_status()
-    # 清理长时间离线客户端
-    t = time.time()
-    for k in list(status.keys()):
-        if t - status[k]["lastHeartbeat"] > 60 * 5:  # 5分钟
-            print(f"清理离线客户端：{k}")
-            del status[k]
-            save_client_status(status)
-            # clients = load_clients()
-            # del clients[k]
-            # save_clients(clients)
-
-    return status
-
-
-@command.get("/command/clients/{client_uid}/status", summary="获取指定客户端状态")
-async def get_client_status(client_uid: str):
-    """
-    获取指定客户端的状态。
-
-    - **client_uid**: 客户端的唯一标识符。
-    """
-    status = load_client_status()
-    if client_uid not in status:
-        raise HTTPException(status_code=404, detail="Client status not found")
-    return status[client_uid]
-
-
-@command.get("/command/clients/{client_uid}/restart", summary="重启指定客户端")
-async def restart_client(client_uid: str):
-    """
-    对指定客户端执行重新启动操作。
-
-    - **client_uid**: 客户端的唯一标识符。
-    """
-    await send_command(client_uid, CommandTypes_pb2.RestartApp)
-    return {"message": f"Restart command sent to client: {client_uid}"}
-
-
-@command.get("/command/clients/{client_uid}/notify", summary="向指定客户端发送消息")
+@command.get("/command/client/{client_uid}/send_notification")
 async def send_notification(client_uid: str,
                             message_mask: str,
                             message_content: str,
@@ -119,55 +167,47 @@ async def send_notification(client_uid: str,
                             is_topmost: bool = True,
                             duration_seconds: float = 5.0,
                             repeat_counts: int = 1):
-    """
-    对指定客户端执行发送消息操作。
+    await command(client_uid, CommandTypes_pb2.SendNotification,
+                       SendNotification_pb2.SendNotification(
+                           MessageMask=message_mask,
+                           MessageContent=message_content,
+                           OverlayIconLeft=overlay_icon_left,
+                           OverlayIconRight=overlay_icon_right,
+                           IsEmergency=is_emergency,
+                           IsSpeechEnabled=is_speech_enabled,
+                           IsEffectEnabled=is_effect_enabled,
+                           IsSoundEnabled=is_sound_enabled,
+                           IsTopmost=is_topmost,
+                           DurationSeconds=duration_seconds,
+                           RepeatCounts=repeat_counts
+                       ).SerializeToString())
 
-    - **client_uid**: 客户端的唯一标识符。
-    - **message_mask**: 消息遮罩文本
-    - **message_content**: 消息内容
-    - **overlay_icon_left**: 左侧图标
-    - **overlay_icon_right**: 右侧图标
-    - **is_emergency**: 是否紧急消息
-    - **is_speech_enabled**: 是否启用语音
-    - **is_effect_enabled**: 是否启用特效
-    - **is_sound_enabled**: 是否启用声音
-    - **is_topmost**: 是否置顶
-    - **duration_seconds**: 持续时间（秒）
-    - **repeat_counts**: 重复次数
-    """
-    notification = SendNotification_pb2.SendNotification(
-        MessageMask=message_mask,
-        MessageContent=message_content,
-        OverlayIconLeft=overlay_icon_left,
-        OverlayIconRight=overlay_icon_right,
-        IsEmergency=is_emergency,
-        IsSpeechEnabled=is_speech_enabled,
-        IsEffectEnabled=is_effect_enabled,
-        IsSoundEnabled=is_sound_enabled,
-        IsTopmost=is_topmost,
-        DurationSeconds=duration_seconds,
-        RepeatCounts=repeat_counts
-    )
-    payload = notification.SerializeToString()
-    await send_command(client_uid, CommandTypes_pb2.SendNotification, payload)
-    return {"message": f"Notification sent to client: {client_uid}"}
+@command.get("/command/client/{client_uid}/update_data")
+async def update_data(client_uid:str):
+    await command(client_uid, CommandTypes_pb2.DataUpdated)
+#endregion
 
 
-@command.get("/command/clients/{client_uid}/update", summary="更新指定客户端数据")
-async def update_client_data(client_uid: str):
-    """
-    对指定客户端执行更新数据操作。
-
-    - **client_uid**: 客户端的唯一标识符。
-    """
-    await send_command(client_uid, CommandTypes_pb2.DataUpdated)
-    return {"message": f"Data update command sent to client: {client_uid}"}
+#region 外部操作方法
+@command.get("/api/refresh")
+async def refresh() -> None:
+    log.log("Settings refreshed.", QuickValues.Log.info)
+    _ = Settings.refresh
+    return None
+#endregion
 
 
-async def start(port=50052, host="0.0.0.0"):
-    """启动FastAPI服务器"""
-    config = uvicorn.Config(app=command, port=port, host=host, log_level="debug")
+#region 启动函数
+async def start(port:int=50052):
+    config = uvicorn.Config(app=command, port=port, host="0.0.0.0", log_level="debug")
     server = uvicorn.Server(config)
-    print("Starting Command server...")
     await server.serve()
+    log.log("Command backend successfully start on {port}".format(port=port), QuickValues.Log.info)
+#endregion
+#endregion
 
+
+#region Running directly processor
+if __name__ == "__main__":
+    log.log(message="Directly started, refused.", status=QuickValues.Log.error)
+#endregion

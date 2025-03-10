@@ -116,8 +116,8 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
 
 
     const version = {
-        server: '0.1.1.37(build 21)',
-        webui: '0.3.2.1(build 78)',
+        server: '0.1.3.0(build 29)',
+        webui: '0.3.3.0(build 91)',
     };
 
     const menuItems = [
