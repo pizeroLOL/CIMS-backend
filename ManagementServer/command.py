@@ -15,7 +15,7 @@ import json
 
 
 #region 导入 gRPC 库
-from ManagementServer.gRPC import command
+from ManagementServer import gRPC
 #endregion
 
 
@@ -149,6 +149,7 @@ async def setting():
     return Settings.conf_dict
 
 
+@command.put("/command/server/settings")
 @command.post("/command/server/settings")
 async def update_settings(request:Request):
     log.log("Settings changed.", QuickValues.Log.critical)
@@ -157,22 +158,33 @@ async def update_settings(request:Request):
 #endregion
 
 
-#region 客户端信息相关 API
+#region 客户端信息管理相关 API
 @command.get("/command/clients/list")
-async def list_client():
+async def list_client(request: Request):
+    log.log("List clients from {client}.".format(
+        client="{host}:{port}".format(host=request.client.host, port=request.client.port)), QuickValues.Log.info)
     return Datas.Clients.refresh()
 
 
 @command.get("/command/clients/status")
-async def status():
+async def status(request: Request):
+    log.log("List clients status from {client}.".format(
+        client="{host}:{port}".format(host=request.client.host, port=request.client.port)), QuickValues.Log.info)
     return Datas.ClientStatus.refresh()
+
+
+@command.post("/command/clients/pro_register")
+@command.put("/command/clients/pre_register")
+@command.get("/command/clients/pre_register")
+async def pre_register(id:str, request:Request):
+    Datas.Clients.pre_register(id=id, conf=request)
 #endregion
 
 
 #region 指令下发 API
 @command.get("/command/client/{client_uid}/restart")
 async def restart(client_uid:str):
-    await command(client_uid, CommandTypes_pb2.RestartApp)
+    await gRPC.command(client_uid, CommandTypes_pb2.RestartApp)
 
 
 @command.get("/command/client/{client_uid}/send_notification")
@@ -188,7 +200,7 @@ async def send_notification(client_uid: str,
                             is_topmost: bool = True,
                             duration_seconds: float = 5.0,
                             repeat_counts: int = 1):
-    await command(client_uid, CommandTypes_pb2.SendNotification,
+    await gRPC.command(client_uid, CommandTypes_pb2.SendNotification,
                        SendNotification_pb2.SendNotification(
                            MessageMask=message_mask,
                            MessageContent=message_content,
@@ -205,7 +217,7 @@ async def send_notification(client_uid: str,
 
 @command.get("/command/client/{client_uid}/update_data")
 async def update_data(client_uid:str):
-    await command(client_uid, CommandTypes_pb2.DataUpdated)
+    await gRPC.command(client_uid, CommandTypes_pb2.DataUpdated)
 #endregion
 
 
@@ -220,7 +232,7 @@ async def refresh() -> None:
 
 #region 启动函数
 async def start(port:int=50052):
-    config = uvicorn.Config(app=command, port=port, host="0.0.0.0", log_level="debug")
+    config = uvicorn.Config(app=command, port=port, host="0.0.0.0", log_level="error", access_log=False)
     server = uvicorn.Server(config)
     await server.serve()
     log.log("Command backend successfully start on {port}".format(port=port), QuickValues.Log.info)
