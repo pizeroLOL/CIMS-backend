@@ -1,11 +1,17 @@
-# 基于 Python 的适用于 [ClassIsland](https://github.com/classisland/classisland) 的集控服务器后端
+# 基于 Python 的适用于 [ClassIsland](https://github.com/classisland/classisland) 的集控服务器
 
-集控服务器分为四个部分，分别是[`api`](./ManagementServer/api.py)[`command`](./ManagementServer/command.py)[`gRPC`](./ManagementServer/gRPC.py)，分别用于：
+集控服务器分为三个部分，分别是[`api`](./ManagementServer/api.py)[`command`](./ManagementServer/command.py)[`gRPC`](./ManagementServer/gRPC.py)，分别用于：
 
 | 组件 | [`api`](./ManagementServer/api.py)   | [`command`](./ManagementServer/command.py) | [`gRPC`](./ManagementServer/gRPC.py) |
 |----|--------------------------------------|--------------------------------------------|--------------------------------------|
 | 用途 | 向客户端分发配置文件                           | 通过API以集控服务器为中介获取客户端状态、向客户端发送指令             | 与客户端建立gRPC链接                         |
 | 端口 | [50050](http://127.0.0.1:50050/docs) | [50052](http://127.0.0.1:50052/docs)       | 50051                                |
+
+## *实验性* 快速部署（适用于 Linux 平台）:
+
+```bash
+bash -c "$(curl -sSL raw.githubusercontent.com/MINIOpenSource/CIMS-backend/main/install.sh)" && cd CIMS/backend && source venv/bin/activate && python CIMS.py
+```
 
 ## 如何使用？
 
@@ -90,7 +96,7 @@
 > ## 注意
 > 目前所有的 README Guide 和 start.py 都是在 Windows 环境开发的，在 Linux 环境下已经有生产部署的先例，但在出现意料之外的问题时，还请在 commit 中提供更多诊断信息，谢谢！
 
-## ~~功能清单~~
+## 功能清单
 
 ## Star 历史
 [![Stargazers over time](https://starchart.cc/kaokao221/ClassIslandManagementServer.py.svg?variant=adaptive)](https://starchart.cc/kaokao221/ClassIslandManagementServer.py)
