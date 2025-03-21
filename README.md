@@ -52,17 +52,8 @@ bash -c "$(curl -sSL raw.githubusercontent.com/MINIOpenSource/CIMS-backend/main/
     ```
     这将会构建 `.proto` 文件生成对应的 Python 代码，以用于 gRPC 通信。
 5. **启动服务器:**
-    *   **使用 `start.py` (第一次部署推荐):**
-        ```bash
-        ./venv/Scripts/python.exe start.py
-        # Windows 环境
-        ```
-        ```bash
-        ./venv/bin/python3 start.py
-        # Linux 环境
-        ```
-        这将启动一个引导，并启动所有服务器组件（gRPC、command、API）。
-    *   **使用 `CIMS.py` (推荐):**
+    *   **使用 `CIMS.py` :**
+        > 第一次启动时，会引导配置一些基础信息
         ```bash
         ./venv/Scripts/python.exe CIMS.py
         # Windows 环境
@@ -80,14 +71,6 @@ bash -c "$(curl -sSL raw.githubusercontent.com/MINIOpenSource/CIMS-backend/main/
         ./venv/bin/python3 CIMS.py -g
         # Linux 环境
         ```
-        这将提供更多的控制选项，例如:
-        * `-c settings.json`: 从自定义的 `settings.json` 文件加载配置。
-        * `-g 50051`: 将 gRPC 端口设置为 60000。
-        * `-a 50050`: 将 API 端口设置为 60001。
-        * `-m 50052`: 将 command 端口设置为 60002。
-        * `-H 127.0.0.1`: 将 host 设置为 127.0.0.1。
-        * `-l`: 列出当前的端口信息，不启动服务器。
-        * `-p`: 生成 `ManagementPreset.json` 集控预设配置文件。
 6. **访问 API:**
    * 你可以在浏览器中访问 `http://127.0.0.1:50050/docs` (或你设置的端口)查看 API 文档.
 
