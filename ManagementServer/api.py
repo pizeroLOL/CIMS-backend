@@ -70,9 +70,8 @@ log = logger.Logger()
 @api.get("/api/v1/client/{client_uid}/manifest")
 async def manifest(client_uid:str | None=None, version:int=int(time.time())) -> dict:
     log.log("Client {client_uid} get manifest.".format(client_uid=client_uid), QuickValues.Log.info)
-    organization_name = Settings.conf_dict.get("OrganizationName", "CMS2.py 本地测试")
-    host = "http://" + Settings.conf_dict.get("host", "0.0.0.0")
-    port = Settings.conf_dict.get("port", 50050)
+    host = Settings.conf_dict.get("api", {}).get("prefix", "http://") + Settings.conf_dict.get("api").get("host", "127.0.0.1")
+    port = Settings.conf_dict.get("api", {}).get("port", 50050)
 
     """获取指定客户端的配置清单"""
     profile_config = Datas.ProfileConfig.profile_config
@@ -86,7 +85,7 @@ async def manifest(client_uid:str | None=None, version:int=int(time.time())) -> 
         "DefaultSettingsSource": await _get_manifest_entry(f"{base_url}DefaultSettings", config["Settings"], version, host, port),
         "PolicySource": await _get_manifest_entry(f"{base_url}Policy", config["Policy"], version, host, port),
         "ServerKind": 1,
-        "OrganizationName": Settings.conf_dict.get("OrganizationName", "CIMS default organization"),
+        "OrganizationName": Settings.conf_dict.get("api", {}).get("OrganizationName", "CIMS default organization"),
     }
 
 

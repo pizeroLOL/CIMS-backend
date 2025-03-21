@@ -1,5 +1,7 @@
 # 基于 Python 的适用于 [ClassIsland](https://github.com/classisland/classisland) 的集控服务器
 
+[加入讨论区](https://qm.qq.com/ez2uhHJv2w)
+
 集控服务器分为三个部分，分别是[`api`](./ManagementServer/api.py)[`command`](./ManagementServer/command.py)[`gRPC`](./ManagementServer/gRPC.py)，分别用于：
 
 | 组件 | [`api`](./ManagementServer/api.py)   | [`command`](./ManagementServer/command.py) | [`gRPC`](./ManagementServer/gRPC.py) |
@@ -30,7 +32,7 @@ bash -c "$(curl -sSL raw.githubusercontent.com/MINIOpenSource/CIMS-backend/main/
 3. **创建 venv 并安装依赖:**
     ```bash
     python -m venv venv
-    ./venv/bin/python -m pip install -r requirements.txt
+    ./venv/Scripts/python.exe -m pip install -r requirements.txt
     # Windows 环境
     ```
     ```bash
@@ -41,7 +43,7 @@ bash -c "$(curl -sSL raw.githubusercontent.com/MINIOpenSource/CIMS-backend/main/
     在 Linux 环境中，可能出现 venv / pip 不可用报错，请根据相关提示从命令行安装 venv 和 pip 后重新创建虚拟环境并安装依赖。
 4. **构建 Protobuf 文件:**
     ```bash
-    ./venv/bin/python -m grpc_tools.protoc --proto_path=. --python_out=. --grpc_python_out=. ./Protobuf/Client/ClientCommandDeliverScReq.proto ./Protobuf/Client/ClientRegisterCsReq.proto ./Protobuf/Command/HeartBeat.proto ./Protobuf/Command/SendNotification.proto ./Protobuf/Enum/CommandTypes.proto ./Protobuf/Enum/Retcode.proto ./Protobuf/Server/ClientCommandDeliverScRsp.proto ./Protobuf/Server/ClientRegisterScRsp.proto ./Protobuf/Service/ClientCommandDeliver.proto ./Protobuf/Service/ClientRegister.proto
+    ./venv/Scripts/python.exe -m grpc_tools.protoc --proto_path=. --python_out=. --grpc_python_out=. ./Protobuf/Client/ClientCommandDeliverScReq.proto ./Protobuf/Client/ClientRegisterCsReq.proto ./Protobuf/Command/HeartBeat.proto ./Protobuf/Command/SendNotification.proto ./Protobuf/Enum/CommandTypes.proto ./Protobuf/Enum/Retcode.proto ./Protobuf/Server/ClientCommandDeliverScRsp.proto ./Protobuf/Server/ClientRegisterScRsp.proto ./Protobuf/Service/ClientCommandDeliver.proto ./Protobuf/Service/ClientRegister.proto
     # Windows 环境
     ```
     ```bash
@@ -52,7 +54,7 @@ bash -c "$(curl -sSL raw.githubusercontent.com/MINIOpenSource/CIMS-backend/main/
 5. **启动服务器:**
     *   **使用 `start.py` (第一次部署推荐):**
         ```bash
-        ./venv/bin/python start.py
+        ./venv/Scripts/python.exe start.py
         # Windows 环境
         ```
         ```bash
@@ -62,24 +64,20 @@ bash -c "$(curl -sSL raw.githubusercontent.com/MINIOpenSource/CIMS-backend/main/
         这将启动一个引导，并启动所有服务器组件（gRPC、command、API）。
     *   **使用 `CIMS.py` (推荐):**
         ```bash
-        ./venv/bin/python CIMS.py
+        ./venv/Scripts/python.exe CIMS.py
         # Windows 环境
         ```
         ```bash
         ./venv/bin/python3 CIMS.py
         # Linux 环境
         ```
-        或者，使用一些参数：
+        生成集控预设文件（`ManagementPreset.json`）：
         ```bash
-        ./venv/bin/python CIMS.py -g 50051 -a 50050 -m 50052
-        ./venv/bin/python CIMS.py -l
-        ./venv/bin/pythom CIMS.py -p
+        ./venv/Scripts/python.exe CIMS.py -g
         # Windows 环境
         ```
         ```bash
-        ./venv/bin/python3 CIMS.py -g 50051 -a 50050 -m 50052
-        ./venv/bin/python3 CIMS.py -l
-        ./venv/bin/pythom3 CIMS.py -p
+        ./venv/bin/python3 CIMS.py -g
         # Linux 环境
         ```
         这将提供更多的控制选项，例如:
