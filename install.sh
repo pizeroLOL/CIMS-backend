@@ -95,6 +95,7 @@ fi
 echo "安装依赖..."
 source venv/bin/activate
 pip3 install -r requirements.txt
+python3 -m grpc_tools.protoc --proto_path=. --python_out=. --grpc_python_out=. ./Protobuf/Client/ClientCommandDeliverScReq.proto ./Protobuf/Client/ClientRegisterCsReq.proto ./Protobuf/Command/HeartBeat.proto ./Protobuf/Command/SendNotification.proto ./Protobuf/Enum/CommandTypes.proto ./Protobuf/Enum/Retcode.proto ./Protobuf/Server/ClientCommandDeliverScRsp.proto ./Protobuf/Server/ClientRegisterScRsp.proto ./Protobuf/Service/ClientCommandDeliver.proto ./Protobuf/Service/ClientRegister.proto
 if [ $? -ne 0 ]; then
     echo "安装依赖失败。请检查 requirements.txt 文件或网络连接。"
     deactivate

@@ -1,1 +1,1 @@
-from ManagementServer import api, gRPC, command
+from . import api, gRPC, command
