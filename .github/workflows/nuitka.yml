@@ -57,7 +57,7 @@ jobs:
         with:
           mode: standalone
           script-name: CIMS.py
-          output-file: ClassWidgets
+          output-file: CIMS-backend
 
       - name: Upload unsigned application
         uses: actions/upload-artifact@v4.4.2
