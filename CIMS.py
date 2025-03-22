@@ -7,6 +7,7 @@ if __name__ !=  "__main__":
 #endregion
 
 
+#region Presets
 #region 首次运行判定
 try:
     open(".installed").close()
@@ -21,24 +22,52 @@ import argparse
 import asyncio
 import json
 from json import JSONDecodeError
+import os
 import sys
 #endregion
 
 
-#region 检查 settings.json
-try:
-    with open("settings.json") as f:
-        json.load(f)
-except JSONDecodeError:
-    with open("settings.json", "w") as f:
-        f.write("{}")
-except FileNotFoundError:
-    with open("settings.json", "w") as f:
-        f.write("{}")
+#region 初始化数据目录
+for _folder in ["./logs", "./Datas/ClassPlan", "./Datas/DefaultSettings",
+                "./Datas/Policy", "./Datas/Subjects", "./Datas/TimeLayout"]:
+    try:
+        os.mkdir(_folder)
+    except FileExistsError:
+        pass
 #endregion
 
 
-#region Presets
+
+#region 检查数据文件
+for _file in ["./settings.json"] + ["./Datas/{}.json".format(name) for
+                                    name in ["client_status", "clients",
+                                             "pre_register", "profile_config"]] + ["./Datas/{}/default.json".format(
+                                name) for name in ["ClassPlan", "DefaultSettings", "Policy", "Subjects", "TimeLayout"]]:
+    try:
+        with open(_file) as f:
+            json.load(f)
+    except JSONDecodeError | FileNotFoundError:
+        with open(_file, "w") as f:
+            f.write("{}")
+#endregion
+
+
+#region 检查项目信息配置
+try:
+    with open("project_info.json") as f:
+        json.load(f)
+except FileNotFoundError | JSONDecodeError:
+    with open("project_info.json", "w ") as f:
+        json.dump({
+                    "name": "CIMS-backend",
+                    "description": "ClassIsland Management Server on Python",
+                    "author": "kaokao221",
+                    "version": "1.0.0.0 pioneer release",
+                    "url": "https://github.com/MINIOpenSource/CIMS-backen.py"
+                  }, f)
+#endregion
+
+
 #region 导入项目内建库
 import Datas
 import logger
