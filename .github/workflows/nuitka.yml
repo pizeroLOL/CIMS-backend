@@ -46,7 +46,6 @@ jobs:
           disable-console: false
           file-version: 1.0.0.0
           product-name: CIMS-backend
-          mingw64: on
       - name: Build (Linux)
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
         uses: Nuitka/Nuitka-Action@main
