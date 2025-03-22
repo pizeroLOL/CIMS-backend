@@ -22,6 +22,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5.3.0
         with:
+          python-version: '3.13'
           architecture: ${{ matrix.arch }}
           cache: 'pip'
           cache-dependency-path: |
@@ -45,7 +46,6 @@ jobs:
           include-data-files: LICENSE=LICENSE
           disable-console: false
           product-name: CIMS-backend
-          file-version: rolling
           mingw64: on
       - name: Build (Linux)
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
