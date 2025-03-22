@@ -66,11 +66,13 @@ else:
                 if _input.startswith("http://"):
                     print("HTTP is not safe and HTTPS recommended.\n" if not _input.startswith("http://localhost") else "",
                           end="")
+                if not _input.startswith(("https://", "http://")):
+                    raise ValueError
                 _set[part]["prefix"] = _input.split(":")[0] + "://"
                 _set[part]["host"] = _input.split(":")[1][2:]
                 _set[part]["port"] = int(_input.split(":")[2])
-                if _set[part]["port"] not in list(range(1, 65536)):
-                    raise KeyError
+                # if _set[part]["port"] not in list(range(-1, 65536)):
+                #     raise KeyError
                 _part_set = False
             except IndexError | ValueError:
                 _input = input("Invalid input, retry:")
