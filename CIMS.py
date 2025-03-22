@@ -12,7 +12,6 @@ try:
     open(".installed").close()
     installed = True
 except FileNotFoundError:
-    open(".installed", "w").close()
     installed = False
 #endregiono
 
@@ -82,6 +81,8 @@ else:
 
     with open("settings.json", "w") as s:
         json.dump(_set, s)
+
+    open(".installed", "w").close()
 #endregion
 
 
