@@ -16,6 +16,29 @@ except FileNotFoundError:
 #endregiono
 
 
+#region 导入辅助库
+import argparse
+import asyncio
+import json
+from json import JSONDecodeError
+import sys
+#endregion
+
+
+#region 检查 settings.json
+try:
+    with open("settings.json") as f:
+        json.load(f)
+except JSONDecodeError:
+    with open("settings.json", "w") as f:
+        f.write("{}")
+        f.close()
+except FileNotFoundError:
+        f.write("{}")
+        f.close()
+#endregion
+
+
 #region Presets
 #region 导入项目内建库
 import Datas
@@ -23,14 +46,6 @@ import logger
 import BuildInClasses
 import QuickValues
 import ManagementServer
-#endregion
-
-
-#region 导入辅助库
-import argparse
-import asyncio
-import json
-import sys
 #endregion
 
 
