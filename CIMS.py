@@ -100,6 +100,13 @@ parser.add_argument(
     help="Generate ManagementPreset.json on the program root."
 )
 
+parser.add_argument(
+    "-r",
+    "--restore",
+    action="store_true",
+    help="Restore, and delete all existed data"
+)
+
 args = parser.parse_args()
 #endregion
 #endregion
@@ -116,7 +123,16 @@ async def start():
 
 
 #region 操作函数
-if args.generate_management_preset:
+if args.restore:
+    if input("Continue?(y/n with default n)") in ("y", "Y"):
+        import os
+        os.remove(".installed")
+        os.remove("settings.json")
+        os.remove("ManagementPreset.json")
+        if input("Remove datas?"):
+            # for _json in ["./Datas/client_status.json", "./Datas/clients.json", "./"]
+            pass
+elif args.generate_management_preset:
     with open("ManagementPreset.json", "w") as mp:
         json.dump({
             "ManagementServerKind": 1,

@@ -71,6 +71,15 @@ bash -c "$(curl -sSL raw.githubusercontent.com/MINIOpenSource/CIMS-backend/main/
         ./venv/bin/python3 CIMS.py -g
         # Linux 环境
         ```
+        > 当出现一些意料之外的问题时，可以尝试使用`-r`参数清除本地的配置文件以尝试修复，在此之前，请手动备份数据：
+        > ```bash
+        > ./venv/Scripts/python.exe CIMS.py -r
+        > # Windows 环境
+        > ```
+        > ```bash
+        > ./venv/bin/python3 CIMS.py -r
+        > # Linux 环境
+        > ```
 6. **访问 API:**
    * 你可以在浏览器中访问 `http://127.0.0.1:50050/docs` (或你设置的端口)查看 API 文档.
 
