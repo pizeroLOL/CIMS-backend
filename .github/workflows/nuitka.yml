@@ -44,6 +44,7 @@ jobs:
           output-file: CIMS-backend
           include-data-files: LICENSE=LICENSE
           disable-console: false
+          file-version: 1.0.0.0
           product-name: CIMS-backend
           mingw64: on
       - name: Build (Linux)
