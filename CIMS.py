@@ -32,10 +32,9 @@ try:
 except JSONDecodeError:
     with open("settings.json", "w") as f:
         f.write("{}")
-        f.close()
 except FileNotFoundError:
+    with open("settings.json", "w") as f:
         f.write("{}")
-        f.close()
 #endregion
 
 
@@ -63,12 +62,12 @@ else:
         "api": {
             "prefix": "http",
             "host": "localhost",
-            "port": 50051
+            "port": 50050
         },
         "command": {
             "prefix": "http",
             "host": "localhost",
-            "port": 50051
+            "port": 50052
         },
         "organization_name": "CIMS Default Organization",
     }
