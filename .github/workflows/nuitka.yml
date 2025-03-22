@@ -2,9 +2,11 @@ on:
   push: 
     branches:
       - main
+      - nuitka-1
   pull_request: 
     branches:
       - main
+      - nuitka-1
   workflow_dispatch:
 
 jobs:
