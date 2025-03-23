@@ -1,7 +1,7 @@
 {
-  "name": "ClassIslandManagementServer.py",
+  "name": "CIMS-backend",
   "description": "ClassIsland Management Server on Python",
   "author": "kaokao221",
-  "version": "alpha_dev",
-  "url": "https://github.com/kaokao221/ClassIslandManagementServer.py"
+  "version": "1.0.0.0 pioneer release",
+  "url": "https://github.com/MINIOpenSource/CIMS-backen.py"
 }
