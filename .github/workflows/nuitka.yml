@@ -25,6 +25,8 @@ jobs:
           cache: 'pip'
           cache-dependency-path: |
             **/requirements*.txt
+      - name: Setup toolkits
+        run: pip install grpcio-tools
       - name: Build protobuf (Windows)
         if: ${{ startsWith(matrix.os, 'windows') }}
         run: |
