@@ -28,7 +28,7 @@ import sys
 
 
 #region 初始化数据目录
-for _folder in ["./logs", "./Datas/ClassPlan", "./Datas/DefaultSettings",
+for _folder in ["./logs", "./Datas", "./Datas/ClassPlan", "./Datas/DefaultSettings",
                 "./Datas/Policy", "./Datas/Subjects", "./Datas/TimeLayout"]:
     try:
         os.mkdir(_folder)
@@ -46,7 +46,7 @@ for _file in ["./settings.json"] + ["./Datas/{}.json".format(name) for
     try:
         with open(_file) as f:
             json.load(f)
-    except (JSONDecodeError, FileNotFoundError):
+    except (FileNotFoundError, JSONDecodeError):
         with open(_file, "w") as f:
             f.write("{}")
 #endregion
@@ -57,7 +57,7 @@ try:
     with open("project_info.json") as f:
         json.load(f)
 except (FileNotFoundError, JSONDecodeError):
-    with open("project_info.json", "w ") as f:
+    with open("project_info.json", "w") as f:
         json.dump({
                     "name": "CIMS-backend",
                     "description": "ClassIsland Management Server on Python",
