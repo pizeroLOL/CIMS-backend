@@ -31,8 +31,8 @@ jobs:
         if: ${{ startsWith(matrix.os, 'windows') }}
         run: |
           $protoFiles = Get-ChildItem Protobuf -Recurse -Filter *.proto -File `
-            | ForEach-Object { $_.FullName.Substring((Get-Location).Path.Lenght + 1) }
-          python -m grpc_tools.protoc --proto_path=. --python_out=. --grpc_python_out=. $protoFiles
+            | ForEach-Object { $_.FullName }
+          python -m grpc_tools.protoc --proto_path=D:\a\CIMS-backend\CIMS-backend\ --python_out=. --grpc_python_out=. $protoFiles
       - name: Build protobuf (Linux)
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
         run: |
